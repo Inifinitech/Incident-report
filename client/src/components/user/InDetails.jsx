@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { AlertTriangle, Clock, MapPin, Camera, MessageSquare, Star } from 'lucide-react';
-import { StarRating } from './StarRating.jsx';
-import { ReviewCard } from './ReviewCard.jsx';
-import { ReviewForm } from './ReviewForm.jsx';
+import React, { useState } from "react";
+import { AlertTriangle, Clock, MapPin, Camera, MessageSquare, Star } from "lucide-react";
+import { StarRating } from "../StarRating.jsx";
+import { ReviewCard } from "../ReviewCard.jsx";
+import { ReviewForm } from "../ReviewForm.jsx";
+
 
 export default function IncidentDetails() {
   const [showReviewForm, setShowReviewForm] = useState(false);
