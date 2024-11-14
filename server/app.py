@@ -1,6 +1,9 @@
-from flask import Flask,make_response,request,jsonify,session
+from flask import Flask,make_response,request,jsonify,session,request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_restful import Resource, Api, reqparse
+from models import db, User, Report, Admin, Media, Notification, Rating
+
 from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
 from sqlalchemy import func
@@ -11,7 +14,7 @@ from flask_restful import Resource,Api
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash
 
-from models import db, User, Report, Media, Notification, Admin
+
 
 app=Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] ="sqlite:///app.db"
@@ -23,6 +26,56 @@ db.init_app(app)
 api=Api(app)
 bcrypt=Bcrypt(app)
 CORS(app)
+
+
+from flask_restful import reqparse
+
+# Arguments for PATCH (partial updates)
+patch_args = reqparse.RequestParser(bundle_errors=True)
+patch_args.add_argument('id', type=int, help='Error!! Add the Id of the Rating')
+patch_args.add_argument('rating', type=int, help='Error!! Add the Rating value')
+patch_args.add_argument('feedback', type=str, help='Error!! Add Feedback for the Rating')
+patch_args.add_argument('report_id', type=int, help='Error!! Add the Report Id associated with the Rating')
+
+# Arguments for POST (creating new entries)
+post_args = reqparse.RequestParser(bundle_errors=True)
+post_args.add_argument('rating', type=int, help='Error!! Add the Rating value', required=True)
+post_args.add_argument('feedback', type=str, help='Error!! Add Feedback for the Rating', required=False)
+post_args.add_argument('report_id', type=int, help='Error!! Add the Report Id associated with the Rating', required=True)
+
+class RatingResource(Resource):
+    def get(self):
+        ratings = Rating.query.all()
+        response = [rating.to_dict() for rating in ratings]
+        return {"ratings": response}
+
+    def post(self):
+        # Using request.get_json() to handle incoming data
+        data = request.get_json()
+
+        # Extract data from the incoming JSON body
+        rating_value = data.get('rating')
+        feedback = data.get('feedback')
+        report_id = data.get('report_id')
+
+        # Check if required fields are present
+        if not rating_value or not report_id:
+            return {"message": "Rating and report_id are required"}, 400
+
+        # Create a new Rating object
+        new_rating = Rating(rating=rating_value, feedback=feedback, report_id=report_id)
+
+        # Add the new rating to the database
+        db.session.add(new_rating)
+        db.session.commit()
+
+        # Return a success response
+        return {"message": "Rating added successfully", "rating": new_rating.to_dict()}, 201
+# class RatingResource(Resource):
+#     def get(self):
+#         ratings = Rating.query.all()
+#         response = [rating.to_dict() for rating in ratings]
+#         return response
 
 @app.after_request
 def after_request(response):
@@ -247,6 +300,10 @@ api.add_resource(PostAdminIncidents, '/admin/status')
 
 # routes for notifications
 # api.add_resource(GetNotifications, '/notifications')
+
+
+#routes for rating
+api.add_resource(RatingResource, '/ratings')
 
 
 
