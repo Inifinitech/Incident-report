@@ -23,6 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-app.db
+*.db
 __pycache__/
 migrations/
