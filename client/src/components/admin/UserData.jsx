@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Mail, Phone, Calendar, AlertTriangle, MoreVertical, Trash2 } from 'lucide-react';
+import { Search, Mail, Phone, Calendar, AlertTriangle, MoreVertical, Trash2, CheckCircle, Slash } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function UserData() {
@@ -43,8 +43,9 @@ export default function UserData() {
       setUsers(prevUsers => prevUsers.map(user =>
         user.id === userId ? { ...user, is_banned: true } : user
       ));
-      alert('User has been banned.');
+      toast.success('User has been banned.');
     } catch (error) {
+      toast.error('Error banning user.');
       console.error('Error banning user:', error);
     }
   };
@@ -64,15 +65,12 @@ export default function UserData() {
       setUsers(prevUsers => prevUsers.map(user =>
         user.id === userId ? { ...user, is_banned: false } : user
       ));
-      alert('User has been unbanned.');
+      toast.success('User has been unbanned.');
     } catch (error) {
+      toast.error('Error unbanning user.');
       console.error('Error unbanning user:', error);
     }
   };
-
-  const filteredUsers = users.filter(user =>
-    user.username && user.username.toLowerCase().includes(search.toLowerCase())
-  );
 
   const deleteUser = (userId) => {
     const user = users.find((user) => user.id === userId);
@@ -95,6 +93,10 @@ export default function UserData() {
       }
     );
   };
+
+  const filteredUsers = users.filter(user =>
+    user.username && user.username.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-6 text-white">
@@ -126,28 +128,65 @@ export default function UserData() {
                     onClick={() => setShowMenu(showMenu === user.id ? null : user.id)}
                   />
                   {showMenu === user.id && (
-                    <div className="absolute right-0 mt-2 w-32 bg-gray-700 rounded-md shadow-lg z-10">
+                    <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-lg shadow-md z-10">
                       {user.is_banned ? (
                         <button
-                          className="block w-full px-4 py-2 text-left text-green-500 hover:bg-gray-600"
+                          className="flex items-center w-full px-4 py-2 text-gray-300 hover:text-green-500 hover:bg-gray-600 gap-2"
                           onClick={() => {
                             unbanUser(user.id);
                             setShowMenu(null);
                           }}
                         >
-                          Unban User
+                          <CheckCircle className="w-4 h-4" />
+                          <span>Unban User</span>
                         </button>
                       ) : (
                         <button
-                          className="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-600"
+                          className="flex items-center w-full px-4 py-2 text-gray-300 hover:text-red-500 hover:bg-gray-600 gap-2"
                           onClick={() => {
                             banUser(user.id);
                             setShowMenu(null);
                           }}
                         >
-                          Ban User
+                          <Slash className="w-4 h-4" />
+                          <span>Ban User</span>
                         </button>
                       )}
+                      <button
+                        className="flex items-center w-full px-4 py-2 text-gray-300 hover:text-red-500 hover:bg-gray-600 gap-2"
+                        onClick={() =>
+                          toast(
+                            (t) => (
+                              <div className="flex items-center justify-between">
+                                <span>Are you sure you want to delete {user.username}?</span>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => {
+                                      deleteUser(user.id);
+                                      toast.dismiss(t.id);
+                                    }}
+                                    className="bg-red-600 text-white px-4 py-2 rounded-md"
+                                  >
+                                    Yes, Delete
+                                  </button>
+                                  <button
+                                    onClick={() => toast.dismiss(t.id)}
+                                    className="bg-gray-600 text-white px-4 py-2 rounded-md"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ),
+                            {
+                              duration: 5000,
+                            }
+                          )
+                        }
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>Delete User</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -174,42 +213,6 @@ export default function UserData() {
                   <p className="text-red-500 font-bold">User is banned</p>
                 )}
               </div>
-
-              <button
-                onClick={() =>
-                  toast(
-                    (t) => (
-                      <div className="flex items-center justify-between">
-                        <span>Are you sure you want to delete {user.username}?</span>
-                        <div>
-                          <button
-                            onClick={() => {
-                              deleteUser(user.id);
-                              toast.dismiss(t.id);
-                            }}
-                            className="bg-red-600 text-white px-4 py-2 rounded-md"
-                          >
-                            Yes, Delete
-                          </button>
-                          <button
-                            onClick={() => toast.dismiss(t.id)}
-                            className="bg-gray-600 text-white px-4 py-2 rounded-md ml-2"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ),
-                    {
-                      duration: 5000,
-                    }
-                  )
-                }
-                className="mt-4 text-red-500"
-              >
-                <Trash2 className="w-4 h-4 inline mr-2" />
-                Delete User
-              </button>
             </div>
           ))
         ) : (
