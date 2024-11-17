@@ -334,7 +334,7 @@ class Notification(db.Model, SerializerMixin):
 
 class Rating(db.Model, SerializerMixin):
     __tablename__ = 'ratings'
-    serialize_rules = ('-report', '-user')
+    serialize_rules = ('-report', '-user',)
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
