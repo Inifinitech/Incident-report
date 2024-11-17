@@ -210,6 +210,225 @@ class NotificationById(Resource):
             return {"error": f"Notification with id={id} not found or not deleted"}, 404
 
         return {"message": f"Notification with id {id} has been deleted successfully"}
+    
+# User CRUD operations
+class UserResource(Resource):
+    def get(self):
+        users = User.query.all()  # Fetch all users from the database
+        response = [user.to_dict() for user in users]  # Convert to dict using the SerializerMixin
+        return {"users": response}
+
+    def post(self):
+        post_args = reqparse.RequestParser(bundle_errors=True)
+        post_args.add_argument('username', type=str, help='Error! Username is required', required=True)
+        post_args.add_argument('email', type=str, help='Error! Email is required', required=True)
+        post_args.add_argument('phone', type=str, help='Error! Phone is required', required=True)
+        post_args.add_argument('password', type=str, help='Error! Password is required', required=True)
+        post_args.add_argument('role', type=str, choices=['user', 'admin'], help='Error! Invalid role')
+        post_args.add_argument('banned', type=bool, help='Specify if the user is banned')
+
+        args = post_args.parse_args()
+
+        user = User(
+            username=args['username'],
+            email=args['email'],
+            phone=args['phone'],
+            password=args['password'],
+            role=args['role'] if args['role'] else 'user',
+            banned=args['banned'] if args['banned'] is not None else False
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+        return {'message': 'User created successfully'}, 201
+
+
+class UserById(Resource):
+    def get(self, id):
+        user = User.query.filter_by(id=id).first()  # Fetch user by ID
+        if user:
+            return user.to_dict()  # Return user as a dictionary
+        return {"error": f"User with id={id} not found"}, 404
+
+    def patch(self, id):
+        patch_args = reqparse.RequestParser(bundle_errors=True)
+        patch_args.add_argument('username', type=str, help='Update the username')
+        patch_args.add_argument('email', type=str, help='Update the email')
+        patch_args.add_argument('phone', type=str, help='Update the phone')
+        patch_args.add_argument('password', type=str, help='Update the password')
+        patch_args.add_argument('role', type=str, choices=['user', 'admin'], help='Update the role')
+        patch_args.add_argument('banned', type=bool, help='Update banned status')
+
+        args = patch_args.parse_args()
+
+        user = User.query.filter_by(id=id).first()  # Fetch user by ID
+        if not user:
+            return {"error": f"User with id={id} not found"}, 404
+
+        for key, value in args.items():
+            if value is not None:
+                setattr(user, key, value)
+
+        db.session.commit()
+
+        return {
+            "message": f"User with id {id} has been successfully updated",
+            "updated_user": user.to_dict()
+        }
+
+    def delete(self, id):
+        deleted_user = User.query.filter_by(id=id).delete()  # Delete user by ID
+        db.session.commit()
+
+        if deleted_user == 0:
+            return {"error": f"User with id={id} not found or not deleted"}, 404
+
+        return {"message": f"User with id {id} has been deleted successfully"}
+    
+#REPORT MODEL CRUD OPERATIONS
+class ReportResource(Resource):
+    def get(self):
+        reports = Report.query.all()  # Fetch all reports from the database
+        response = [report.to_dict() for report in reports]  # Convert to dict using the SerializerMixin
+        return {"reports": response}
+
+    def post(self):
+        post_args = reqparse.RequestParser(bundle_errors=True)
+        post_args.add_argument('user_id', type=int, help='Error! User ID is required', required=True)
+        post_args.add_argument('description', type=str, help='Error! Description is required', required=True)
+        post_args.add_argument('status', type=str, choices=['under investigation', 'resolved', 'pending'], help='Error! Invalid status')
+        post_args.add_argument('latitude', type=float, help='Error! Latitude is required', required=True)
+        post_args.add_argument('longitude', type=float, help='Error! Longitude is required', required=True)
+        post_args.add_argument('response_time', type=int, help='Response time in minutes')
+        
+        args = post_args.parse_args()
+
+        report = Report(
+            user_id=args['user_id'],
+            description=args['description'],
+            status=args['status'] if args['status'] else 'under investigation',
+            latitude=args['latitude'],
+            longitude=args['longitude'],
+            response_time=args['response_time'] if args['response_time'] else None
+        )
+
+        db.session.add(report)
+        db.session.commit()
+
+        return {'message': 'Report created successfully'}, 201
+    
+
+class ReportById(Resource):
+    def get(self, id):
+        report = Report.query.filter_by(id=id).first()  
+        if report:
+            return report.to_dict() 
+        return {"error": f"Report with id={id} not found"}, 404
+
+    def patch(self, id):
+        patch_args = reqparse.RequestParser(bundle_errors=True)
+        patch_args.add_argument('description', type=str, help='Update the description')
+        patch_args.add_argument('status', type=str, choices=['under investigation', 'resolved', 'pending'], help='Update the status')
+        patch_args.add_argument('latitude', type=float, help='Update the latitude')
+        patch_args.add_argument('longitude', type=float, help='Update the longitude')
+        patch_args.add_argument('response_time', type=int, help='Update the response time')
+
+        args = patch_args.parse_args()
+
+        report = Report.query.filter_by(id=id).first()  
+        if not report:
+            return {"error": f"Report with id={id} not found"}, 404
+
+        for key, value in args.items():
+            if value is not None:
+                setattr(report, key, value)
+
+        db.session.commit()
+
+        return {
+            "message": f"Report with id {id} has been successfully updated",
+            "updated_report": report.to_dict()
+        }
+
+    def delete(self, id):
+        deleted_report = Report.query.filter_by(id=id).delete()  
+        db.session.commit()
+
+        if deleted_report == 0:
+            return {"error": f"Report with id={id} not found or not deleted"}, 404
+
+        return {"message": f"Report with id {id} has been deleted successfully"}
+
+    
+#ADMIN MODEL CRUD OPERATIONS
+class AdminResource(Resource):
+    def get(self):
+        admins = Admin.query.all()  # Fetch all admin actions from the database
+        response = [admin.to_dict() for admin in admins]  # Convert to dict using SerializerMixin
+        return {"admins": response}
+
+    def post(self):
+        post_args = reqparse.RequestParser(bundle_errors=True)
+        post_args.add_argument('incident_report_id', type=int, help='Error! Incident report ID is required')
+        post_args.add_argument('emergency_only_id', type=int, help='Error! Emergency ID is required')
+        post_args.add_argument('action', type=str, help='Action taken by the admin', required=True)
+        post_args.add_argument('admin_id', type=int, help='Admin ID is required', required=True)
+        
+        args = post_args.parse_args()
+
+        admin_act = Admin(
+            incident_report_id=args['incident_report_id'],
+            emergency_only_id=args['emergency_only_id'],
+            action=args['action'],
+            admin_id=args['admin_id']
+        )
+
+        db.session.add(admin_act)
+        db.session.commit()
+
+        return {'message': 'Admin action created successfully'}, 201
+
+
+class AdminById(Resource):
+    def get(self, id):
+        admin = Admin.query.filter_by(id=id).first()  # Fetch admin action by ID
+        if admin:
+            return admin.to_dict()  # Return admin action as a dictionary
+        return {"error": f"Admin action with id={id} not found"}, 404
+
+    def patch(self, id):
+        patch_args = reqparse.RequestParser(bundle_errors=True)
+        patch_args.add_argument('incident_report_id', type=int, help='Update the incident report ID')
+        patch_args.add_argument('emergency_only_id', type=int, help='Update the emergency ID')
+        patch_args.add_argument('action', type=str, help='Update the action')
+        patch_args.add_argument('admin_id', type=int, help='Update the admin ID')
+
+        args = patch_args.parse_args()
+
+        admin = Admin.query.filter_by(id=id).first()  # Fetch admin action by ID
+        if not admin:
+            return {"error": f"Admin action with id={id} not found"}, 404
+
+        for key, value in args.items():
+            if value is not None:
+                setattr(admin, key, value)
+
+        db.session.commit()
+
+        return {
+            "message": f"Admin action with id {id} has been successfully updated",
+            "updated_admin_action": admin.to_dict()
+        }
+
+    def delete(self, id):
+        deleted_admin = Admin.query.filter_by(id=id).delete()  # Delete admin action by ID
+        db.session.commit()
+
+        if deleted_admin == 0:
+            return {"error": f"Admin action with id={id} not found or not deleted"}, 404
+
+        return {"message": f"Admin action with id {id} has been deleted successfully"}
 
 # class Users(Resource):
 #     # @jwt_required()
@@ -682,8 +901,31 @@ class NotificationById(Resource):
 # api.add_resource(Analytics, '/analytics')
 
 
-# routes for notifications
-# api.add_resource(GetNotifications, '/notifications')
+
+
+#RATING MODELS ROUTES
+api.add_resource(RatingResource, '/ratings')
+api.add_resource(RatingById, '/rating/<int:id>')
+
+#NOTIFICATION MODEL ROUTES
+api.add_resource(NotificationResource, '/notifications')
+api.add_resource(NotificationById, '/notification/<int:id>')
+
+# USER MODEL ROUTES
+api.add_resource(UserResource, '/users')  
+api.add_resource(UserById, '/user/<int:id>')  
+
+#REPORT CRUD MODEL ROUTES
+api.add_resource(ReportResource, '/reports')
+api.add_resource(ReportById, '/report/<int:id>')
+
+
+#ADMIN MODEL CRUD ROUTES
+api.add_resource(AdminResource, '/admins')  
+api.add_resource(AdminById, '/admin/<int:id>') 
+
+
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5555))
