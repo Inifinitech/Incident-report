@@ -340,10 +340,11 @@ class Rating(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     report_id = db.Column(db.Integer, db.ForeignKey('incident_reports.id'), nullable=False)
     rating_value = db.Column(db.Integer, nullable=False)
+    feedback = db.Column(db.String(), nullable=False)  
     created_at = db.Column(db.DateTime, default=func.now())
 
     user = db.relationship('User', back_populates='ratings', cascade='all, delete')
     report = db.relationship('Report', back_populates='ratings', cascade='all, delete')
 
     def __repr__(self):
-        return f"<Rating(id={self.id}, user_id={self.user_id}, report_id={self.report_id}, rating_value={self.rating_value})>"
+        return f"<Rating(id={self.id}, user_id={self.user_id}, report_id={self.report_id}, rating_value={self.rating_value}, feedback='{self.feedback[:20]}...')>"
