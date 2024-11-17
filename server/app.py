@@ -429,6 +429,70 @@ class AdminById(Resource):
             return {"error": f"Admin action with id={id} not found or not deleted"}, 404
 
         return {"message": f"Admin action with id {id} has been deleted successfully"}
+    
+
+# IMAGEURL MODEL CRUD OPERATIONS
+class ImageUrlResource(Resource):
+    def get(self):
+        images = ImageUrl.query.all()  
+        response = [image.to_dict() for image in images] 
+        return {"images": response}
+
+    def post(self):
+        post_args = reqparse.RequestParser(bundle_errors=True)
+        post_args.add_argument('incident_report_id', type=int, help='Error! Incident report ID is required', required=True)
+        post_args.add_argument('media_image', type=str, help='Error! Media image URL is required', required=True)
+        
+        args = post_args.parse_args()
+
+        image = ImageUrl(
+            incident_report_id=args['incident_report_id'],
+            media_image=args['media_image']
+        )
+
+        db.session.add(image)
+        db.session.commit()
+
+        return {'message': 'Image uploaded successfully'}, 201
+
+
+class ImageUrlById(Resource):
+    def get(self, id):
+        image = ImageUrl.query.filter_by(id=id).first()  
+        if image:
+            return image.to_dict()  
+        return {"error": f"Image with id={id} not found"}, 404
+
+    def patch(self, id):
+        patch_args = reqparse.RequestParser(bundle_errors=True)
+        patch_args.add_argument('incident_report_id', type=int, help='Update the incident report ID')
+        patch_args.add_argument('media_image', type=str, help='Update the media image URL')
+
+        args = patch_args.parse_args()
+
+        image = ImageUrl.query.filter_by(id=id).first()  
+        if not image:
+            return {"error": f"Image with id={id} not found"}, 404
+
+        for key, value in args.items():
+            if value is not None:
+                setattr(image, key, value)
+
+        db.session.commit()
+
+        return {
+            "message": f"Image with id {id} has been successfully updated",
+            "updated_image": image.to_dict()
+        }
+
+    def delete(self, id):
+        deleted_image = ImageUrl.query.filter_by(id=id).delete()  
+        db.session.commit()
+
+        if deleted_image == 0:
+            return {"error": f"Image with id={id} not found or not deleted"}, 404
+
+        return {"message": f"Image with id {id} has been deleted successfully"}
 
 # class Users(Resource):
 #     # @jwt_required()
@@ -919,11 +983,13 @@ api.add_resource(UserById, '/user/<int:id>')
 api.add_resource(ReportResource, '/reports')
 api.add_resource(ReportById, '/report/<int:id>')
 
-
 #ADMIN MODEL CRUD ROUTES
 api.add_resource(AdminResource, '/admins')  
 api.add_resource(AdminById, '/admin/<int:id>') 
 
+#IMAGEURL MODEL  CRUD ROUTES
+api.add_resource(ImageUrlResource, '/images')  
+api.add_resource(ImageUrlById, '/image/<int:id>')
 
 
 
