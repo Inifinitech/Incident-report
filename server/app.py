@@ -494,6 +494,70 @@ class ImageUrlById(Resource):
 
         return {"message": f"Image with id {id} has been deleted successfully"}
 
+
+# VIDEOURL MODEL CRUD OPERATIONS
+class VideoUrlResource(Resource):
+    def get(self):
+        videos = VideoUrl.query.all()  
+        response = [video.to_dict() for video in videos]  
+        return {"videos": response}
+
+    def post(self):
+        post_args = reqparse.RequestParser(bundle_errors=True)
+        post_args.add_argument('incident_report_id', type=int, help='Error! Incident report ID is required', required=True)
+        post_args.add_argument('media_video', type=str, help='Error! Media video URL is required', required=True)
+        
+        args = post_args.parse_args()
+
+        video = VideoUrl(
+            incident_report_id=args['incident_report_id'],
+            media_video=args['media_video']
+        )
+
+        db.session.add(video)
+        db.session.commit()
+
+        return {'message': 'Video uploaded successfully'}, 201
+
+
+class VideoUrlById(Resource):
+    def get(self, id):
+        video = VideoUrl.query.filter_by(id=id).first()  # Fetch video by ID
+        if video:
+            return video.to_dict()  # Return video data as a dictionary
+        return {"error": f"Video with id={id} not found"}, 404
+
+    def patch(self, id):
+        patch_args = reqparse.RequestParser(bundle_errors=True)
+        patch_args.add_argument('incident_report_id', type=int, help='Update the incident report ID')
+        patch_args.add_argument('media_video', type=str, help='Update the media video URL')
+
+        args = patch_args.parse_args()
+
+        video = VideoUrl.query.filter_by(id=id).first()  
+        if not video:
+            return {"error": f"Video with id={id} not found"}, 404
+
+        for key, value in args.items():
+            if value is not None:
+                setattr(video, key, value)
+
+        db.session.commit()
+
+        return {
+            "message": f"Video with id {id} has been successfully updated",
+            "updated_video": video.to_dict()
+        }
+
+    def delete(self, id):
+        deleted_video = VideoUrl.query.filter_by(id=id).delete()  
+        db.session.commit()
+
+        if deleted_video == 0:
+            return {"error": f"Video with id={id} not found or not deleted"}, 404
+
+        return {"message": f"Video with id {id} has been deleted successfully"}
+
 # class Users(Resource):
 #     # @jwt_required()
 #     # @allow("admin")
@@ -990,6 +1054,10 @@ api.add_resource(AdminById, '/admin/<int:id>')
 #IMAGEURL MODEL  CRUD ROUTES
 api.add_resource(ImageUrlResource, '/images')  
 api.add_resource(ImageUrlById, '/image/<int:id>')
+
+#VIDEOURL CRUD ROUTES
+api.add_resource(VideoUrlResource, '/videos')  
+api.add_resource(VideoUrlById, '/video/<int:id>')
 
 
 
