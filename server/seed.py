@@ -114,19 +114,20 @@ from app import app
 #     db.session.commit()
 
 ratings = [
-    {"user_id": 1, "report_id": 1, "rating_value": 5},
-    {"user_id": 2, "report_id": 2, "rating_value": 4},
-    {"user_id": 3, "report_id": 3, "rating_value": 3},
-    {"user_id": 4, "report_id": 4, "rating_value": 2},
-    {"user_id": 5, "report_id": 5, "rating_value": 5},
-    {"user_id": 6, "report_id": 6, "rating_value": 4},
-    {"user_id": 7, "report_id": 7, "rating_value": 3},
-    {"user_id": 8, "report_id": 8, "rating_value": 5},
-    {"user_id": 9, "report_id": 9, "rating_value": 1}
+    {"user_id": 1, "report_id": 1, "rating_value": 5, "feedback": "Quick and efficient response to the accident. Highly satisfied with the service."},
+    {"user_id": 2, "report_id": 2, "rating_value": 4, "feedback": "Good response time, but could have communicated more frequently during the process."},
+    {"user_id": 3, "report_id": 3, "rating_value": 3, "feedback": "Response was okay, but it took longer than expected to resolve the issue."},
+    {"user_id": 4, "report_id": 4, "rating_value": 2, "feedback": "Response was slow and there was a lack of updates on the situation."},
+    {"user_id": 5, "report_id": 5, "rating_value": 5, "feedback": "Excellent support and fast resolution. Thank you for addressing the issue promptly."},
+    {"user_id": 6, "report_id": 6, "rating_value": 4, "feedback": "The team was responsive, but I felt there could have been more proactive communication."},
+    {"user_id": 7, "report_id": 7, "rating_value": 3, "feedback": "The issue was addressed, but I was left waiting longer than expected for updates."},
+    {"user_id": 8, "report_id": 8, "rating_value": 5, "feedback": "Superb response. The team was professional, kept me informed, and resolved everything quickly."},
+    {"user_id": 9, "report_id": 9, "rating_value": 1, "feedback": "Very poor response. No clear updates or action taken for a long period."}
 ]
 
 # Add ratings to the session
 with app.app_context():
     db.session.add_all([Rating(**rate) for rate in ratings])
     db.session.commit()
+
 
