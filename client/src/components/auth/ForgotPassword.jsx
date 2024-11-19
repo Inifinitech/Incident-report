@@ -1,13 +1,16 @@
 import React, { useState } from "react";
+import { ArrowLeft } from "lucide-react"; 
+import { useNavigate } from "react-router-dom"; 
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://127.0.0.1:5555/forgot-password", {
+      const response = await fetch("http://127.0.0.1:5555/forgot_password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -28,6 +31,14 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
+      <button
+        onClick={() => navigate("/login")} 
+        className="absolute top-4 left-4 text-yellow-500 hover:text-yellow-400 focus:outline-none"
+
+      >
+        <ArrowLeft className="w-6 h-6" />
+      </button>
+
       <div className="max-w-md w-full text-white">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold">Forgot Password</h1>
@@ -65,4 +76,3 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
-

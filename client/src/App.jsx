@@ -10,12 +10,10 @@ import InDetails from './components/user/InDetails';
 import UserSettings from './components/user/UserSettings';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
-// import ForgotPassword from './components/auth/ForgotPassword.jsx';
+import ForgotPassword from './components/auth/ForgotPassword.jsx';
+import ResetPassword from './components/auth/ResetPassword.jsx';
 import Home from './components/Home';
 import Contact from './components/Contact';
-import ForgotPassword from './components/Forgot.jsx';
-import ResetPassword from './components/Reset.jsx';
-
 import AppSettings from './components/admin/AppSettings.jsx';
 import AdminOverview from './components/admin/AdminOverview.jsx';
 import Analytics from './components/admin/Analytics.jsx'
@@ -37,7 +35,6 @@ function App() {
         {/* Authentication routes*/}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/forgotP" element={<ForgotPassword />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/reset-password" element={<ResetPassword/>} />
         <Route path="/forgot-password" element={<ForgotPassword/>} />

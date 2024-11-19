@@ -575,7 +575,7 @@ class ForgotPassword(Resource):
         token = s.dumps(email, salt='password_reset')
 
         # Create reset link
-        reset_url = url_for('reset_password', token=token, _external=True)
+        reset_url = url_for('resetpassword', token=token, _external=True)
 
         # Send the reset link via email
         try:
@@ -604,7 +604,7 @@ class ResetPassword(Resource):
     def post(self, token):
         try:
             # Load the email from the token
-            email = s.loads(token, salt='password-reset', max_age=3600)
+            email = s.loads(token, salt='passwordreset', max_age=3600)
         except SignatureExpired:
             return {"message": "The reset link has expired."}, 400
         except BadSignature:

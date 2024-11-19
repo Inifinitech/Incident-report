@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AlertTriangle, LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { AlertTriangle, LogIn, Mail, Lock, ArrowLeft } from 'lucide-react'; 
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -14,8 +14,8 @@ const loginValidationSchema = Yup.object({
 
 export default function Login() {
   const navigate = useNavigate();
-  const value = useContext(AppContext)
-  const [showPassword, setShowPassword] = useState(false)
+  const value = useContext(AppContext);
+  const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -25,7 +25,6 @@ export default function Login() {
     validationSchema: loginValidationSchema,
     onSubmit: async (values) => {
       try {
-        
         const response = await fetch('http://127.0.0.1:5555/login', {
           method: 'POST',
           headers: {
@@ -33,13 +32,13 @@ export default function Login() {
           },
           body: JSON.stringify(values),
         });
-        
+
         if (response.ok) {
-          return response.json().then(data => {
-            localStorage.setItem('user_id', data.user_data.id)
+          return response.json().then((data) => {
+            localStorage.setItem('user_id', data.user_data.id);
             toast.success('Login successful!');
-            data.role === 'user' ? navigate('/user') : navigate('/admin/d')
-          })
+            data.role === 'user' ? navigate('/user') : navigate('/admin/d');
+          });
         } else {
           const errorMessage = await response.text();
           toast.error(errorMessage || 'Login failed. Please check your credentials.');
@@ -50,9 +49,21 @@ export default function Login() {
     },
   });
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
       <div className="max-w-md w-full text-white">
+        {/* Back to Home Button */}
+        <button
+          onClick={handleBackToHome}
+          className="absolute top-4 left-4 text-yellow-500 hover:text-yellow-400 focus:outline-none"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <AlertTriangle className="w-10 h-10 text-yellow-500" />
@@ -107,7 +118,7 @@ export default function Login() {
               <input type="checkbox" className="mr-2" />
               <span>Remember me</span>
             </label>
-            <Link to="/forgotP" className="text-yellow-500 hover:text-yellow-400">
+            <Link to="/forgot-Password" className="text-yellow-500 hover:text-yellow-400">
               Forgot password?
             </Link>
           </div>
