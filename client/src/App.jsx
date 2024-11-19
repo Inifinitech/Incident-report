@@ -10,6 +10,7 @@ import InDetails from './components/user/InDetails';
 import UserSettings from './components/user/UserSettings';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
+// import ForgotPassword from './components/auth/ForgotPassword.jsx';
 import Home from './components/Home';
 import Contact from './components/Contact';
 import ForgotPassword from './components/Forgot.jsx';
@@ -30,9 +31,13 @@ function App() {
     <Router>
       <Routes>
        <Route path="/" element={<Home />} />
+       <Route path="/about" element={<AboutUs />} />
+        <Route path="/services" element={<Services />} />
+
         {/* Authentication routes*/}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgotP" element={<ForgotPassword />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/reset-password" element={<ResetPassword/>} />
         <Route path="/forgot-password" element={<ForgotPassword/>} />
@@ -48,10 +53,6 @@ function App() {
           <Route path="/news" element={<News />} />
           <Route path="/incidents" element={<InDetails />} />
           <Route path="/settings" element={<UserSettings />} />
-
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/services" element={<Services />} />
-
 
         </Route>
 

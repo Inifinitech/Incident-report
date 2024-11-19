@@ -92,22 +92,22 @@ export default function LandingPage() {
           )}
         </div>
       </div>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-900">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="text-4xl font-bold text-gray-600">{stat.value}</div>
-              <div className="mt-2 text-sm text-gray-900">{stat.label}</div>
+              <div className="text-4xl font-bold text-gray-300">{stat.value}</div>
+              <div className="mt-2 text-sm text-gray-200">{stat.label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-900">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-black mb-4">
+          <h2 className="text-3xl font-bold text-gray-300 mb-4">
             Why Choose MyResque?
           </h2>
           <p className="text-gray-600 text-lg">
