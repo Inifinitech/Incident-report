@@ -1,4 +1,4 @@
-from flask import Flask,make_response,request,jsonify,session
+from flask import Flask,make_response,request,jsonify,session,url_for,render_template
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
@@ -16,6 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash
 
 from models import db, User, Report, Notification, Admin, EmergencyReport, ImageUrl, VideoUrl, Rating,ContactMessage, UserRoleEnum
+from itsdangerous import URLSafeTimedSerializer,BadSignature, SignatureExpired
 
 app=Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] ="sqlite:///app.db"
@@ -41,7 +42,10 @@ app.config['MAIL_PASSWORD'] = 'gzwp wywl ummf holw'
 app.config['MAIL_DEFAULT_SENDER'] = 'kipkiruidennis25@gmail.com'
 
 mail = Mail(app)
+s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
+# Serializer for token generation
+serializer = URLSafeTimedSerializer(app.secret_key)
 # initializing JWTManager
 jwt = JWTManager(app)
 
@@ -542,7 +546,7 @@ class Contact(Resource):
             msg = Message(
                 subject=f"Contact Form Submission from {name}",
                 sender=email,  
-                recipients=['kipkiruidennis25@gmail.com'],  
+                recipients=['dennis.kipkurui@student.moringaschool.com'],  
                 body=f"Name: {name}\nEmail: {email}\nMessage:\n{message}"
             )
             mail.send(msg)
@@ -551,6 +555,55 @@ class Contact(Resource):
         except Exception as e:
             print(f"Error: {e}")
             return {'error': 'Failed to send your message. Please try again later.'}, 500
+        
+@app.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    email = request.json.get('email')
+
+    # Check if email exists in the database
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"message": "Email not found"}), 404
+
+    # Generate a reset token
+    token = s.dumps(email, salt='password-reset')
+
+    # Create reset link
+    reset_url = url_for('reset_password', token=token, _external=True)
+
+    # Send the reset link via email
+    try:
+        msg = Message("Password Reset Request", recipients=[email])
+        msg.body = f"Click the following link to reset your password: {reset_url}"
+        mail.send(msg)
+        return jsonify({"message": "Password reset email sent!"}), 200
+    except Exception as e:
+        return jsonify({"message": "Failed to send email", "error": str(e)}), 500
+
+
+# Step 2: Reset password (Password Reset Page)
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        # Try to load the email from the token (token can expire after a certain time, e.g., 3600 seconds)
+        email = s.loads(token, salt='password-reset', max_age=3600)
+    except SignatureExpired:
+        return jsonify({"message": "The reset link has expired."}), 400
+    except BadSignature:
+        return jsonify({"message": "Invalid reset link."}), 400
+
+    if request.method == 'GET':
+        # Show the reset password form (HTML page)
+        return render_template('reset_password_form.html', email=email)
+    
+    elif request.method == 'POST':
+        # Handle form submission with the new password
+        new_password = request.form['password']
+        # Reset the user's password in the database here
+        # Example: update_user_password(email, new_password)
+
+        return jsonify({"message": "Password reset successful!"})
+
 
 
 api.add_resource(GetUser, '/user/<int:id>')
