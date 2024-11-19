@@ -65,7 +65,7 @@ export default function Signup() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <AlertTriangle className="w-10 h-10 text-yellow-500" />
-            <h1 className="text-2xl font-bold">Zusha! Platform</h1>
+            <h1 className="text-2xl font-bold">RescueApp! Platform</h1>
           </div>
           <p className="text-gray-400">Create an account to start reporting incidents</p>
         </div>

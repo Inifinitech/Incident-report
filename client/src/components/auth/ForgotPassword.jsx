@@ -7,7 +7,7 @@ const ForgotPassword = () => {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://127.0.0.1:5555/forgot_password", {
+      const response = await fetch("http://127.0.0.1:5555/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,3 +65,4 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
+

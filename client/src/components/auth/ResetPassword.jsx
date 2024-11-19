@@ -15,7 +15,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:5555/reset_password/${token}`, {
+      const response = await fetch(`http://127.0.0.1:5555/reset-password/${token}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -86,3 +86,4 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+

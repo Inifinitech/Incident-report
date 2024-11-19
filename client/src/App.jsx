@@ -11,8 +11,6 @@ import UserSettings from './components/user/UserSettings';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import Home from './components/Home';
-import Services from './components/Services';
-// import About from './components/About';
 import Contact from './components/Contact';
 import ForgotPassword from './components/Forgot.jsx';
 import ResetPassword from './components/Reset.jsx';
@@ -22,18 +20,19 @@ import AdminOverview from './components/admin/AdminOverview.jsx';
 import Analytics from './components/admin/Analytics.jsx'
 import UserData from './components/admin/UserData.jsx'
 import ReportedIncidents from './components/admin/ReportedIncident.jsx'
+import AboutUs from "./components/AboutUs.jsx";
+import Services from './components/Services.jsx';
+
 
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Authentication routes come first */}
+       <Route path="/" element={<Home />} />
+        {/* Authentication routes*/}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/services" element={<Services />} />
-        {/* <Route path="/about" element={<About />} /> */}
         <Route path="/contact" element={<Contact />} />
         <Route path="/reset-password" element={<ResetPassword/>} />
         <Route path="/forgot-password" element={<ForgotPassword/>} />
@@ -49,6 +48,11 @@ function App() {
           <Route path="/news" element={<News />} />
           <Route path="/incidents" element={<InDetails />} />
           <Route path="/settings" element={<UserSettings />} />
+
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/services" element={<Services />} />
+
+
         </Route>
 
         {/* Admin route */}

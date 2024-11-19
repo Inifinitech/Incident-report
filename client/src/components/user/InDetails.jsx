@@ -1,43 +1,76 @@
 import React, { useState, useEffect } from "react";
-import { AlertTriangle, Clock, MapPin, Camera, MessageSquare, Star } from "lucide-react";
+import { Clock, MapPin, Star } from "lucide-react";
 import { StarRating } from "../StarRating.jsx";
 import { ReviewCard } from "../ReviewCard.jsx";
 import { ReviewForm } from "../ReviewForm.jsx";
+import { toast } from "react-hot-toast";
+
+const fetchAddressFromCoordinates = async (lat, lon) => {
+  try {
+    const response = await fetch(
+      `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=e8e97b4bccb04cbf84c4835212b56571`
+    );
+    const data = await response.json();
+    return data.results[0]?.formatted || "Unknown Location";
+  } catch (error) {
+    console.error("Error fetching address:", error);
+    return "Error fetching address";
+  }
+};
 
 export default function IncidentDetails() {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [selectedIncidentId, setSelectedIncidentId] = useState(null);
   const [incidents, setIncidents] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [userId, setUserId] = useState(localStorage.getItem('user_id'));
+  const [addresses, setAddresses] = useState({});
+  const [userId, setUserId] = useState(localStorage.getItem("user_id"));
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch(`http://127.0.0.1:5555/user/${userId}`)
-      .then(response => response.json())
-      .then((data) => { 
-        console.log(data)
-        setIncidents(data.incident_reports)
+      .then((response) => response.json())
+      .then(async (data) => {
+        const fetchedIncidents = data.incident_reports;
 
-        })          
-      .catch(error => console.error('Error fetching incidents:', error));
+        // Fetch addresses for incidents with lat/lon
+        const fetchedAddresses = {};
+        for (const incident of fetchedIncidents) {
+          if (incident.latitude && incident.longitude) {
+            const address = await fetchAddressFromCoordinates(
+              incident.latitude,
+              incident.longitude
+            );
+            fetchedAddresses[incident.id] = address;
+          }
+        }
 
-    fetch('http://127.0.0.1:5555/ratings')
-      .then(response => response.json())
-      .then(data => {
-        setReviews(data.message)})
-      .catch(error => console.error('Error fetching reviews:', error));
+        setIncidents(fetchedIncidents);
+        setAddresses(fetchedAddresses);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching incidents:", error);
+        setLoading(false);
+      });
+
+    fetch("http://127.0.0.1:5555/ratings")
+      .then((response) => response.json())
+      .then((data) => {
+        setReviews(data.message);
+      })
+      .catch((error) => console.error("Error fetching reviews:", error));
   }, [userId]);
-
 
   const handleSubmitReview = (reviewData) => {
     if (!selectedIncidentId) return;
 
-    // Check if user already reviewed this incident
     const existingReview = reviews.find(
       (review) => review.incidentId === selectedIncidentId && review.userId === userId
     );
     if (existingReview) {
-      alert("You have already rated this incident.");
+      toast("You have already rated this incident.");
       return;
     }
 
@@ -46,23 +79,34 @@ export default function IncidentDetails() {
       author: reviewData.user_id.username,
       content: reviewData.content,
       rating: reviewData.rating,
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split("T")[0],
       incidentId: selectedIncidentId,
-      userId: userId // Store userId with review
+      userId: userId,
     };
-    setReviews([newReview, ...reviews]);
+    setReviews((prevReviews) => [newReview, ...prevReviews]);
     setShowReviewForm(false);
   };
 
   const getIncidentReviews = (incidentId) => {
-    return reviews.filter(review => review.incidentId === incidentId);
+    return reviews.filter((review) => review.incidentId === incidentId);
   };
 
   const getAverageRating = (incidentId) => {
     const incidentReviews = getIncidentReviews(incidentId);
     if (incidentReviews.length === 0) return 0;
-    return incidentReviews.reduce((acc, review) => acc + review.rating, 0) / incidentReviews.length;
+    return (
+      incidentReviews.reduce((acc, review) => acc + review.rating, 0) /
+      incidentReviews.length
+    );
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto text-center">
+        <div className="text-white">Loading incidents and reviews...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -72,15 +116,22 @@ export default function IncidentDetails() {
         {incidents.map((incident) => {
           const incidentReviews = getIncidentReviews(incident.id);
           const averageRating = getAverageRating(incident.id);
+          const address = addresses[incident.id] || "Fetching address...";
 
           return (
             <div key={incident.id} className="bg-gray-800 rounded-lg overflow-hidden text-white">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-white">{incident.title}</h2>
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    incident.status === 'Resolved' ? 'bg-green-500' : 'bg-yellow-500'
-                  } text-gray-900`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      incident.status === "resolved"
+                        ? "bg-green-500"
+                        : incident.status === "under investigation"
+                        ? "bg-yellow-500"
+                        : "bg-red-500"
+                    } text-gray-900`}
+                  >
                     {incident.status}
                   </span>
                 </div>
@@ -89,46 +140,28 @@ export default function IncidentDetails() {
                   <div>
                     <div className="flex items-center gap-2 text-gray-400 mb-2">
                       <MapPin className="w-4 h-4" />
-                      <span>{incident.location}</span>
+                      <span>{address}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-400 mb-4">
                       <Clock className="w-4 h-4" />
-                      <span>{incident.timestamp}</span>
+                      <span>{incident.created_at}</span>
                     </div>
                     <p className="text-gray-300">{incident.description}</p>
                   </div>
 
                   <div>
-                  {incident.images.length > 0 && (
-                    <img 
-                      src={incident.images[0].media_image} 
-                      alt="incident image"
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                  )}
-                  </div>
-                  <div>
-                    {incident.video && incident.video.length > 0 && (
-                      <video 
-                        src={incident.video[0]?.media_video} 
-                        controls 
-                        className="w-full h-48 rounded-lg"
+                    {incident.images.length > 0 && (
+                      <img
+                        src={incident.images[0].media_image}
+                        alt="incident image"
+                        className="w-full h-48 object-cover rounded-lg"
                       />
-                      
-                  )}
+                    )}
                   </div>
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-gray-400 hover:text-white rounded-lg">
-                    <Camera className="w-4 h-4" />
-                    <span>Add Media</span>
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-gray-400 hover:text-white rounded-lg">
-                    <MessageSquare className="w-4 h-4" />
-                    <span>Comment</span>
-                  </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setSelectedIncidentId(incident.id);
                       setShowReviewForm(true);
@@ -147,7 +180,8 @@ export default function IncidentDetails() {
                       <div className="flex items-center gap-2">
                         <StarRating rating={averageRating} />
                         <span className="text-gray-400">
-                          ({incidentReviews.length} {incidentReviews.length === 1 ? 'review' : 'reviews'})
+                          ({incidentReviews.length}{" "}
+                          {incidentReviews.length === 1 ? "review" : "reviews"})
                         </span>
                       </div>
                     </div>

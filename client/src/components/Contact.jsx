@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-import Navbar from './Navbar';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -21,7 +20,7 @@ export default function ContactPage() {
     setIsSubmitted(false);
 
     try {
-      const response = await fetch('http://127.0.0.1:5555/api/contact', {
+      const response = await fetch('http://127.0.0.1:5555/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,7 +42,6 @@ export default function ContactPage() {
 
   return (
     <>
-      <Navbar />
       <div className="pt-16 min-h-screen bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-12">

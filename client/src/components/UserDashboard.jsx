@@ -9,7 +9,6 @@ export default function UserDashboard() {
   return (
     <div className="flex min-h-screen bg-gray-900">
       <div className="flex-1 p-6">
-        {/* Header Input Section */}
         <div className="bg-gray-800 rounded-lg p-6 mb-8">
           <div className="flex items-center gap-4 mb-4">
             <input
@@ -36,7 +35,6 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatCard
             icon={AlertTriangle}
@@ -63,11 +61,11 @@ export default function UserDashboard() {
 
         <div className="bg-gray-800 rounded-lg p-6 mb-8">
           <div className="flex items-start gap-4">
-            <img
+            {/* <img
               src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop"
               alt="User avatar"
               className="w-12 h-12 rounded-full"
-            />
+            /> */}
             <div className="flex-1">
               <h3 className="font-medium text-white">Report an accident or emergency now</h3>
               <p className="text-gray-400 mt-2">
@@ -93,21 +91,20 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Recent Alerts Section */}
         <div className="bg-gray-800 rounded-lg p-6">
           <h2 className="text-xl font-bold mb-4 text-white">Recent Alerts</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AlertCard
-              image="https://via.placeholder.com/400x200"
+              image="https://images.pexels.com/photos/1739855/pexels-photo-1739855.jpeg?auto=compress&cs=tinysrgb&w=300"
               title="Flood Alert"
               description="Heavy rains are expected in the next 48 hours, causing potential floods."
               time="2 hours ago"
               location="Nairobi, Kenya"
               severity="high"
-              status="Active"
+              status="Resolved"
             />
             <AlertCard
-              image="https://via.placeholder.com/400x200"
+              image="https://images.pexels.com/photos/189524/pexels-photo-189524.jpeg?auto=compress&cs=tinysrgb&w=300"
               title="Power Outage"
               description="Scheduled maintenance may cause power outages in your area."
               time="1 day ago"
@@ -116,13 +113,13 @@ export default function UserDashboard() {
               status="Resolved"
             />
             <AlertCard
-              image="https://via.placeholder.com/400x200"
+              image="https://images.pexels.com/photos/10476391/pexels-photo-10476391.jpeg?auto=compress&cs=tinysrgb&w=300"
               title="Road Block"
               description="A fallen tree is blocking the main road in your area."
               time="3 hours ago"
               location="Kisumu, Kenya"
               severity="low"
-              status="Active"
+              status="Resolved"
             />
           </div>
         </div>

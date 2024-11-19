@@ -5,6 +5,8 @@ from flask_mail import Mail, Message
 # from flask_bcrypt import Bcrypt
 from sqlalchemy import func, MetaData
 from flask_cors import CORS
+import cloudinary
+import cloudinary.uploader
 import os
 
 from flask_jwt_extended import create_access_token,JWTManager, create_refresh_token, jwt_required, get_jwt_identity, current_user, verify_jwt_in_request, get_jwt
@@ -23,6 +25,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] ="sqlite:///app.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
 app.config['SECRET_KEY'] = '0c3ZMJFCAm5T-NK5ZzBv50ZLuxamAllTob6uzEqRR14'
 app.config['JWT_ACCESS_TOKEN_EXPIRES']=timedelta(minutes=30)
+
 app.config['JWT_ACCESS_REFRESH_EXPIRES']=timedelta(days=30)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
@@ -32,6 +35,7 @@ migrate=Migrate(app,db)
 db.init_app(app)
 api=Api(app)
 # bcrypt=Bcrypt(app)
+
 
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -83,6 +87,7 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
     return response
+
 
 
 class Users(Resource):
@@ -556,54 +561,74 @@ class Contact(Resource):
             print(f"Error: {e}")
             return {'error': 'Failed to send your message. Please try again later.'}, 500
         
-@app.route('/forgot-password', methods=['POST'])
-def forgot_password():
-    email = request.json.get('email')
+# Resource for Forgot Password
+class ForgotPassword(Resource):
+    def post(self):
+        email = request.json.get('email')
 
-    # Check if email exists in the database
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return jsonify({"message": "Email not found"}), 404
+        # Check if email exists in the database
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return {"message": "Email not found"}, 404
 
-    # Generate a reset token
-    token = s.dumps(email, salt='password-reset')
+        # Generate a reset token
+        token = s.dumps(email, salt='password_reset')
 
-    # Create reset link
-    reset_url = url_for('reset_password', token=token, _external=True)
+        # Create reset link
+        reset_url = url_for('reset_password', token=token, _external=True)
 
-    # Send the reset link via email
-    try:
-        msg = Message("Password Reset Request", recipients=[email])
-        msg.body = f"Click the following link to reset your password: {reset_url}"
-        mail.send(msg)
-        return jsonify({"message": "Password reset email sent!"}), 200
-    except Exception as e:
-        return jsonify({"message": "Failed to send email", "error": str(e)}), 500
+        # Send the reset link via email
+        try:
+            msg = Message("Password Reset Request", recipients=[email])
+            msg.body = f"Click the following link to reset your password: {reset_url}"
+            mail.send(msg)
+            return {"message": "Password reset email sent!"}, 200
+        except Exception as e:
+            return {"message": "Failed to send email", "error": str(e)}, 500
 
 
-# Step 2: Reset password (Password Reset Page)
-@app.route('/reset-password/<token>', methods=['GET', 'POST'])
-def reset_password(token):
-    try:
-        # Try to load the email from the token (token can expire after a certain time, e.g., 3600 seconds)
-        email = s.loads(token, salt='password-reset', max_age=3600)
-    except SignatureExpired:
-        return jsonify({"message": "The reset link has expired."}), 400
-    except BadSignature:
-        return jsonify({"message": "Invalid reset link."}), 400
+# Resource for Reset Password
+class ResetPassword(Resource):
+    def get(self, token):
+        try:
+            # Load the email from the token
+            email = s.loads(token, salt='password-reset', max_age=3600)
+        except SignatureExpired:
+            return {"message": "The reset link has expired."}, 400
+        except BadSignature:
+            return {"message": "Invalid reset link."}, 400
 
-    if request.method == 'GET':
-        # Show the reset password form (HTML page)
-        return render_template('reset_password_form.html', email=email)
-    
-    elif request.method == 'POST':
-        # Handle form submission with the new password
-        new_password = request.form['password']
-        # Reset the user's password in the database here
-        # Example: update_user_password(email, new_password)
+        # Return a JSON response with the email (form rendering can happen on the frontend)
+        return {"message": "Valid reset link", "email": email}, 200
 
-        return jsonify({"message": "Password reset successful!"})
+    def post(self, token):
+        try:
+            # Load the email from the token
+            email = s.loads(token, salt='password-reset', max_age=3600)
+        except SignatureExpired:
+            return {"message": "The reset link has expired."}, 400
+        except BadSignature:
+            return {"message": "Invalid reset link."}, 400
 
+        # Get the new password from the request
+        new_password = request.json.get('password')
+        if not new_password:
+            return {"message": "Password is required"}, 400
+
+        # Update the user's password in the database
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return {"message": "User not found"}, 404
+
+        user.set_password(new_password)  # Assuming a `set_password` method exists in your User model
+        user.save()  # Save the updated user to the database
+
+        return {"message": "Password reset successful!"}, 200
+
+
+# Registering resources with Flask-RESTful
+api.add_resource(ForgotPassword, '/forgot_password')
+api.add_resource(ResetPassword, '/reset_password/<string:token>')
 
 
 api.add_resource(GetUser, '/user/<int:id>')
@@ -625,6 +650,7 @@ api.add_resource(EmergencyPost, '/emergency-reporting')
 # routes for media
 api.add_resource(MediaPost, '/media')
 api.add_resource(MediaDelete, '/media/<int:id>')
+# api.add_resource(MediaUpload, '/upload')
 
 # routes for admin actions
 api.add_resource(AdminIncidents, '/admin/reports')
