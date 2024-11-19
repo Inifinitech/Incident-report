@@ -37,7 +37,6 @@ export default function AdminOverview() {
 
   useEffect(() => {
     fetchUsers();
-    // fetchIncidents();
   }, []);
 
   useEffect(() => {

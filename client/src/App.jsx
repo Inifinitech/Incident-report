@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout.jsx';
-import AdminDashboard from './components/AdminDashboard.jsx';
+// import AdminDashboard from './components/AdminDashboard.jsx';
 import UserDashboard from './components/UserDashboard.jsx';
 import IncidentReport from './components/user/IncidentReport';
-import IncidentMap from './components/user/IncidentMap';
+import IncidentMapUser from './components/user/IncidentMapUser';
 import News from './components/user/News';
 import InDetails from './components/user/InDetails';
 import UserSettings from './components/user/UserSettings';
@@ -19,6 +19,7 @@ import AdminOverview from './components/admin/AdminOverview.jsx';
 import Analytics from './components/admin/Analytics.jsx'
 import UserData from './components/admin/UserData.jsx'
 import ReportedIncidents from './components/admin/ReportedIncident.jsx'
+import IncidentMapAdmin from './components/admin/IncidentMapAdmin';
 import AboutUs from "./components/AboutUs.jsx";
 import Services from './components/Services.jsx';
 
@@ -46,7 +47,8 @@ function App() {
         <Route element={<Layout isAdmin={false} />}>
           <Route path="/user" element={<UserDashboard />} />
           <Route path="/report" element={<IncidentReport />} />
-          <Route path="/map" element={<IncidentMap />} />
+          <Route path="/map/user" element={<IncidentMapUser />} />
+          <Route path="/map/admin" element={<IncidentMapAdmin />} />
           <Route path="/news" element={<News />} />
           <Route path="/incidents" element={<InDetails />} />
           <Route path="/settings" element={<UserSettings />} />
@@ -55,7 +57,7 @@ function App() {
 
         {/* Admin route */}
         <Route element={<Layout isAdmin={true} />}>
-          <Route path="/admin" element={<AdminDashboard />} />
+          {/* <Route path="/admin" element={<AdminDashboard />} /> */}
           <Route path="/admin/d" element={<AdminOverview />} />
           <Route path="admin/analytics" element={<Analytics />} />
           <Route path="admin/usermanagement" element={<UserData />} />

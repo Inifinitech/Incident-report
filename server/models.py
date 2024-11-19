@@ -84,26 +84,14 @@ class Report(db.Model, SerializerMixin):
     videos = db.relationship('VideoUrl', back_populates='report', cascade='all, delete')
     ratings = db.relationship('Rating', back_populates='report', cascade='all, delete')
 
-        
-    def reverse_geocode(self, latitude, longitude):
-        api_key = 'e8e97b4bccb04cbf84c4835212b56571'
-        url = f'https://api.opencagedata.com/geocode/v1/json?q={latitude}+{longitude}&key={api_key}'
-        
-        response = requests.get(url)
-        data = response.json()
-
-        if data and data['results']:
-            return data['results'][0]['formatted']
-        else:
-            return "Location not available"
 
     def to_dict(self):
-        location = self.reverse_geocode(self.latitude, self.longitude)
         return {
             'id': self.id,
             'description': self.description,
             'status': self.status,
-            'location': location,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
             'reporter': self.user.username if self.user else None,
             'date': self.created_at, 
             'images': [image.media_image for image in self.images],
@@ -166,30 +154,15 @@ class EmergencyReport(db.Model, SerializerMixin):
 
     admin_acts = db.relationship('Admin', back_populates='emergencies')
 
-    def reverse_geocode(self, latitude, longitude):
-        api_key = ''
-        url = f'https://api.opencagedata.com/geocode/v1/json?q={latitude}+{longitude}&key={api_key}'
-        
-        response = requests.get(url)
-        data = response.json()
-
-        if data and data['results']:
-            return data['results'][0]['formatted']
-        else:
-            return "Location not available"
-
     def to_dict(self):
-        location = self.reverse_geocode(self.latitude, self.longitude)
         return {
         'id': self.id,
         'description': self.description,
         'status': self.status,
         'latitude': self.latitude,
         'longitude': self.longitude,
-        'reporter': self.user.username if self.user else None,
-        'date': self.created_at,
-        'images': [image.media_image for image in self.images],
-        'videos': [video.media_video for video in self.videos]
+        'reporter': self.name if self.name else None,
+        'date': self.created_at
         }
 
 class Notification(db.Model, SerializerMixin):
@@ -214,7 +187,6 @@ class Rating(db.Model, SerializerMixin):
     user = db.relationship('User', back_populates='ratings', cascade='all, delete')
     report = db.relationship('Report', back_populates='ratings', cascade='all, delete')
 
-# Contact model
 class ContactMessage(db.Model):
     __tablename__='contact_messages'
     

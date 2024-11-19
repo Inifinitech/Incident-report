@@ -1,14 +1,13 @@
-
-import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight, Clock, Shield, Phone } from 'lucide-react';
 import Navbar from './Navbar';
 
 const VehicleCard = ({ category, type, details, price, perKm, recovery }) => (
-  <div className="bg-white rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-100">
+  <div className="bg-white/10 rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-100">
     <div className="flex justify-between items-start mb-6">
       <div>
-        <h3 className="text-2xl font-bold text-gray-500">{category}</h3>
-        <p className="text-gray-600 mt-1">{type}</p>
+        <h3 className="text-2xl font-bold text-gray-200">{category}</h3>
+        <p className="text-gray-200 mt-1">{type}</p>
       </div>
       <div className="bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-medium">
         {details}
@@ -16,15 +15,15 @@ const VehicleCard = ({ category, type, details, price, perKm, recovery }) => (
     </div>
     <div className="space-y-4">
       <div className="flex justify-between items-center py-3 border-b border-gray-100">
-        <span className="text-gray-600">Base Rate (0-30km)</span>
+        <span className="text-gray-400">Base Rate (0-30km)</span>
         <span className="text-lg font-semibold text-gray-500">{price}</span>
       </div>
       <div className="flex justify-between items-center py-3 border-b border-gray-100">
-        <span className="text-gray-600">Per KM after 30km</span>
+        <span className="text-gray-400">Per KM after 30km</span>
         <span className="text-lg font-semibold text-gray-500">{perKm}</span>
       </div>
       <div className="flex justify-between items-center py-3">
-        <span className="text-gray-600">Recovery Service</span>
+        <span className="text-gray-400">Recovery Service</span>
         <span className="text-lg font-semibold text-gray-500">{recovery}</span>
       </div>
     </div>
@@ -40,8 +39,8 @@ const ProcessStep = ({ step, title, description }) => (
       <div className="h-full w-0.5 bg-[#5D4E8C] opacity-20 mt-4"></div>
     </div>
     <div className="pb-12">
-      <h4 className="text-xl font-bold text-gray-500 mb-2">{title}</h4>
-      <p className="text-gray-600 leading-relaxed">{description}</p>
+      <h4 className="text-xl font-bold text-gray-300 mb-2">{title}</h4>
+      <p className="text-gray-300 leading-relaxed">{description}</p>
     </div>
   </div>
 );
@@ -55,8 +54,8 @@ function Services() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-500 mb-4">Our Towing & Recovery Rates</h2>
-          <p className="text-gray-600 text-lg">Transparent pricing with no hidden charges*</p>
+          <h2 className="text-4xl font-bold text-gray-400 mb-4">Our Towing & Recovery Rates</h2>
+          <p className="text-gray-500 text-lg">Transparent pricing with no hidden charges*</p>
           <p className="text-sm text-gray-500 mt-2">*Rates may vary based on conditions and location</p>
         </div>
 
@@ -87,10 +86,10 @@ function Services() {
           />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-12 mt-20">
+        <div className=" rounded-2xl shadow-xl p-12 mt-20">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-500 mb-4">Service Delivery Journey</h2>
-            <p className="text-gray-600 text-lg">Simple, streamlined process for quick assistance</p>
+            <h2 className="text-4xl font-bold text-gray-200 mb-4">Service Delivery Journey</h2>
+            <p className="text-gray-300 text-lg">Simple, streamlined process for quick assistance</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-12">
@@ -121,31 +120,33 @@ function Services() {
               <h3 className="text-2xl font-bold mb-8">Why Choose RescueApp?</h3>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <Clock className="w-8 h-8 flex-shrink-0" />
+                  <Clock className="w-8 h-8 text-yellow-500 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold mb-2">15-Minute Response</h4>
                     <p className="text-gray-200">Fastest incident response service in Kenya</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <Shield className="w-8 h-8 flex-shrink-0" />
+                  <Shield className="w-8 h-8 text-yellow-500 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold mb-2">Verified Providers</h4>
                     <p className="text-gray-200">All service providers are vetted and certified</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
-                  <Phone className="w-8 h-8 flex-shrink-0" />
+                  <Phone className="w-8 h-8 text-yellow-500 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold mb-2">24/7 Support</h4>
                     <p className="text-gray-200">Round-the-clock assistance via multiple channels</p>
                   </div>
                 </div>
               </div>
-              <button className="w-full mt-8 bg-white text-gray-500 py-3 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2">
+              <Link to={'/signup'}>
+              <button className="w-full mt-8 bg-white/10 text-gray-100 py-3 px-6 rounded-lg font-semibold hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2">
                 <span>Get Started Now</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
+              </Link>
             </div>
           </div>
         </div>

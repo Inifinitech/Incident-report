@@ -61,11 +61,6 @@ export default function UserDashboard() {
 
         <div className="bg-gray-800 rounded-lg p-6 mb-8">
           <div className="flex items-start gap-4">
-            {/* <img
-              src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop"
-              alt="User avatar"
-              className="w-12 h-12 rounded-full"
-            /> */}
             <div className="flex-1">
               <h3 className="font-medium text-white">Report an accident or emergency now</h3>
               <p className="text-gray-400 mt-2">
