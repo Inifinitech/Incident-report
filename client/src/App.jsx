@@ -14,6 +14,8 @@ import Home from './components/Home';
 import Services from './components/Services';
 // import About from './components/About';
 import Contact from './components/Contact';
+import ForgotPassword from './components/Forgot.jsx';
+import ResetPassword from './components/Reset.jsx';
 
 import AppSettings from './components/admin/AppSettings.jsx';
 import AdminOverview from './components/admin/AdminOverview.jsx';
@@ -33,6 +35,11 @@ function App() {
         <Route path="/services" element={<Services />} />
         {/* <Route path="/about" element={<About />} /> */}
         <Route path="/contact" element={<Contact />} />
+        <Route path="/reset-password" element={<ResetPassword/>} />
+        <Route path="/forgot-password" element={<ForgotPassword/>} />
+
+
+
 
         {/* Layout with user/admin routes */}
         <Route element={<Layout isAdmin={false} />}>
