@@ -10,7 +10,7 @@ export default function UserData() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5555/users');
+        const response = await fetch('https://incident-report-98rf.onrender.com/users');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -30,7 +30,7 @@ export default function UserData() {
 
   const banUser = async (userId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5555/users/${userId}/ban`, {
+      const response = await fetch(`https://incident-report-98rf.onrender.com/users/${userId}/ban`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export default function UserData() {
 
   const unbanUser = async (userId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5555/users/${userId}/unban`, {
+      const response = await fetch(`https://incident-report-98rf.onrender.com/users/${userId}/unban`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export default function UserData() {
     const user = users.find((user) => user.id === userId);
 
     toast.promise(
-      fetch(`http://127.0.0.1:5555/user/${userId}`, {
+      fetch(`https://incident-report-98rf.onrender.com/user/${userId}`, {
         method: 'DELETE',
       }).then((response) => {
         if (!response.ok) {

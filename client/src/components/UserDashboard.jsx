@@ -1,40 +1,55 @@
-import { useState } from 'react';
-import { Camera, MapPin, AlertTriangle, ThumbsUp, MessageSquare, Share2, Clock } from 'lucide-react';
+import { AlertTriangle, ThumbsUp, MessageSquare, Share2, Clock } from 'lucide-react';
 import { AlertCard } from './user/AlertCard';
 import { StatCard } from './user/StatCard';
+import { useContext, useEffect, useState } from 'react';
+import { AppContext } from '../AppContext';
+import { useParams } from 'react-router-dom';
 
 export default function UserDashboard() {
-  const [newIncident, setNewIncident] = useState('');
+  const { value } = useContext(AppContext);
+  const { userData, setUserData } = value;
+
+  const params = useParams();
+  const id = params.id;
+  console.log(id);
+
+  // Loading state
+  const [isUserDataLoaded, setIsUserDataLoaded] = useState(false);
+
+  useEffect(() => {
+    // Fetch user data based on user ID
+    fetch(`http://127.0.0.1:5555/user/${id}`)
+      .then(response => response.json())
+      .then(data => {
+        setUserData(data); // Update context with fetched user data
+        setIsUserDataLoaded(true);
+      })
+      .catch((error) => console.error('Error fetching user data:', error));
+  }, [id, setUserData]);
 
   return (
     <div className="flex min-h-screen bg-gray-900">
       <div className="flex-1 p-6">
         <div className="bg-gray-800 rounded-lg p-6 mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <input
-              type="text"
-              placeholder="What happened?"
-              className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-yellow-500"
-              value={newIncident}
-              onChange={(e) => setNewIncident(e.target.value)}
-            />
-            <div className="flex gap-2">
-              <button className="p-2 text-gray-400 hover:text-white">
-                <Camera className="w-5 h-5" />
-              </button>
-              <button className="p-2 text-gray-400 hover:text-white">
-                <MapPin className="w-5 h-5" />
-              </button>
-              <button className="p-2 text-gray-400 hover:text-white">
-                <AlertTriangle className="w-5 h-5" />
-              </button>
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 bg-yellow-500 text-gray-900 flex items-center justify-center rounded-full text-2xl font-bold">
+              {/* Display username's first letter or a default letter */}
+              {isUserDataLoaded ? (userData?.username?.charAt(0).toUpperCase() || 'U') : 'U'}
             </div>
-            <button className="px-6 py-2 bg-yellow-500 text-gray-900 font-medium rounded-lg hover:bg-yellow-600 transition-colors">
-              Submit Report
-            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-white">
+                {isUserDataLoaded ? `Welcome, ${userData?.username}` : 'Welcome, User!'}
+              </h1>
+              <p className="text-gray-400 mt-2">
+                {isUserDataLoaded
+                  ? 'We are here to assist you in reporting incidents quickly and effectively. Your role in making our communities safer is invaluable. Let’s get started!'
+                  : 'Loading user data...'}
+              </p>
+            </div>
           </div>
         </div>
 
+        {/* Statistics Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatCard
             icon={AlertTriangle}
@@ -64,7 +79,7 @@ export default function UserDashboard() {
             <div className="flex-1">
               <h3 className="font-medium text-white">Report an accident or emergency now</h3>
               <p className="text-gray-400 mt-2">
-                Welcome to Ajali! Incident Reporting, a modern web application designed for
+                Welcome to RescueApp! Incident Reporting, a modern web application designed for
                 reporting accidents and emergencies in Kenya. Our user-friendly features for incident
                 reporting help save lives.
               </p>
@@ -86,6 +101,7 @@ export default function UserDashboard() {
           </div>
         </div>
 
+        {/* Recent Alerts Section */}
         <div className="bg-gray-800 rounded-lg p-6">
           <h2 className="text-xl font-bold mb-4 text-white">Recent Alerts</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

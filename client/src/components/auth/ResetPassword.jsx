@@ -15,7 +15,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:5555/reset_password/${token}`, {
+      const response = await fetch(`https://incident-report-98rf.onrender.com/reset-password/${token}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

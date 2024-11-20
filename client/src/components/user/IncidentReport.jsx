@@ -7,23 +7,12 @@ import toast from 'react-hot-toast';
 export default function IncidentReport() {
   const [location, setLocation] = useState('');
   const [latLong, setLatLong] = useState({ lat: '', long: '' });
-  const [images, setImages] = useState([]);
-  const [videos, setVideos] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [videoPreviews, setVideoPreviews] = useState([]);
   const [responseMessage, setResponseMessage] = useState('');
-  // const [category, setCategory] = useState(''); 
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
-
-  const categories = {
-    traffic: ['traffic', 'accident', 'collision', 'crash'],
-    medical: ['medical', 'emergency', 'injury', 'sick'],
-    fire: ['fire', 'burn', 'flame'],
-    security: ['theft', 'robbery', 'steal', 'stolen', 'security'],
-    natural: ['flood', 'earthquake', 'storm', 'landslide']
-  };
 
   const formik = useFormik({
     initialValues: {
@@ -40,77 +29,43 @@ export default function IncidentReport() {
     }),
     onSubmit: async (values) => {
       try {
-        const userDescription = values.description.toLowerCase();
-        let incidentCategory = 'other';
+        // Create form data object for multipart submission
+        const formData = new FormData();
+        formData.append('user_id', localStorage.getItem('user_id'));
+        formData.append('description', values.description);
+        formData.append('location', values.location);
+        formData.append('latitude', values.latitude);
+        formData.append('longitude', values.longitude);
 
-        for (const [key, keywords] of Object.entries(categories)) {
-          if (keywords.some(keyword => userDescription.includes(keyword))) {
-            incidentCategory = key;
-            break;
-          }
-        }
-
-        const incidentResponse = await fetch('http://127.0.0.1:5555/incidents', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            description: values.description,
-            location: values.location,
-            latitude: values.latitude,
-            longitude: values.longitude,
-            user_id: localStorage.getItem('user_id'),
-            category: incidentCategory
-          }),
+        // Append images to FormData
+        values.images.forEach((image) => {
+          formData.append('media_image', image);
         });
 
-        const incidentData = await incidentResponse.json();
-        const incidentId = incidentData.id;
+        // Append videos to FormData
+        values.videos.forEach((video) => {
+          formData.append('media_video', video);
+        });
 
-        if (!incidentId) {
-          setResponseMessage('Failed to create incident. Please try again.');
-          return;
+        // Send the POST request
+        const response = await fetch('http://127.0.0.1:5555/incidents', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          toast.success('Incident reported successfully. Help is on the way!');
+          formik.resetForm();
+          setImagePreviews([]);
+          setVideoPreviews([]);
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.error || 'Error posting incident or media.');
         }
-
-        const convertToBase64 = (file) => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (error) => reject(error);
-          });
-        };
-
-        const mediaUploads = await Promise.all(
-          [...images, ...videos].map(async (file) => {
-            const base64File = await convertToBase64(file);
-
-            const mediaData = {
-              incident_report_id: incidentId,
-              media_image: file.type.startsWith('image') ? base64File : null,
-              media_video: file.type.startsWith('video') ? base64File : null,
-            };
-
-            return fetch('http://127.0.0.1:5555/media', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(mediaData),
-            });
-          })
-        );
-
-        toast.success('Incident reported successfully..Help is on the way!');
-        setResponseMessage('Incident and media posted successfully!');
-
-        formik.resetForm();
-        setImages([]);
-        setVideos([]);
-        setImagePreviews([]);
-        setVideoPreviews([]);
       } catch (error) {
         console.error('Error creating incident or uploading media:', error);
-        setResponseMessage('Error posting incident or media. Please try again.');
+        toast.error('An unexpected error occurred. Please try again.');
       }
     },
   });
@@ -148,19 +103,17 @@ export default function IncidentReport() {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    setImages(files);
     formik.setFieldValue('images', files);
 
-    const imageUrls = files.map(file => URL.createObjectURL(file));
+    const imageUrls = files.map((file) => URL.createObjectURL(file));
     setImagePreviews(imageUrls);
   };
 
   const handleVideoUpload = (e) => {
     const files = Array.from(e.target.files);
-    setVideos(files);
     formik.setFieldValue('videos', files);
 
-    const videoUrls = files.map(file => URL.createObjectURL(file));
+    const videoUrls = files.map((file) => URL.createObjectURL(file));
     setVideoPreviews(videoUrls);
   };
 
@@ -213,7 +166,8 @@ export default function IncidentReport() {
                   type="button"
                   className="p-2 bg-gray-700 text-gray-400 hover:text-white rounded-lg"
                   onClick={handleGeolocation}
-                >Use My Location
+                >
+                  Use My Location
                   <MapPin className="w-5 h-5" />
                 </button>
               </div>

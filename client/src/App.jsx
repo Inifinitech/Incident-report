@@ -25,15 +25,16 @@ import Services from './components/Services.jsx';
 
 
 
+
 function App() {
   return (
     <Router>
       <Routes>
-       <Route path="/" element={<Home />} />
-       <Route path="/about" element={<AboutUs />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<AboutUs />} />
         <Route path="/services" element={<Services />} />
 
-        {/* Authentication routes*/}
+        {/* Authentication routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/contact" element={<Contact />} />
@@ -43,31 +44,30 @@ function App() {
 
 
 
-        {/* Layout with user/admin routes */}
         <Route element={<Layout isAdmin={false} />}>
-          <Route path="/user" element={<UserDashboard />} />
+          <Route path="/user/:id" element={<UserDashboard />} />
           <Route path="/report" element={<IncidentReport />} />
           <Route path="/map/user" element={<IncidentMapUser />} />
-          <Route path="/map/admin" element={<IncidentMapAdmin />} />
           <Route path="/news" element={<News />} />
           <Route path="/incidents" element={<InDetails />} />
           <Route path="/settings" element={<UserSettings />} />
-
         </Route>
 
-        {/* Admin route */}
-        <Route element={<Layout isAdmin={true} />}>
-          {/* <Route path="/admin" element={<AdminDashboard />} /> */}
-          <Route path="/admin/d" element={<AdminOverview />} />
-          <Route path="admin/analytics" element={<Analytics />} />
-          <Route path="admin/usermanagement" element={<UserData />} />
-          <Route path="admin/incidents" element={<ReportedIncidents />} />
-          <Route path="admin/settings" element={<AppSettings />} />
+    
+        <Route  element={<Layout isAdmin={true} />}>
+          <Route path="/admin/d/:id" element={<AdminOverview />} />
+          <Route path="/admin/analytics" element={<Analytics />} />
+          <Route path="/admin/usermanagement" element={<UserData />} />
+          <Route path="/admin/incidents" element={<ReportedIncidents />} />
+          <Route path="/admin/contact" element={<Contact />} />
+          <Route path="/admin/settings" element={<AppSettings />} />
+          <Route path="/map/admin" element={<IncidentMapAdmin />} />
         </Route>
       </Routes>
       <Toaster position="top-right" />
     </Router>
-  );
+
+);
 }
 
 export default App;

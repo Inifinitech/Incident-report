@@ -19,7 +19,7 @@ export default function ReportedIncidents() {
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5555/incidents');
+        const response = await fetch('https://incident-report-98rf.onrender.com/incidents');
         const data = await response.json();
 
         const userIncidents = await Promise.all(data.map(async (incident) => {
@@ -34,7 +34,7 @@ export default function ReportedIncidents() {
           };
         }));
 
-        const emergencyResponse = await fetch('http://127.0.0.1:5555/emergency-reporting');
+        const emergencyResponse = await fetch('https://incident-report-98rf.onrender.com/emergency-reporting');
         const emergencyData = await emergencyResponse.json();
 
         const emergencyIncidents = await Promise.all(emergencyData.map(async (emergency) => {
@@ -72,7 +72,7 @@ export default function ReportedIncidents() {
   };
 
   const updateStatus = async (id, newStatus, type) => {
-    const url = type === 'emergency' ? `http://127.0.0.1:5555/emergency/${id}/status` : `http://127.0.0.1:5555/incident/${id}/status`;
+    const url = type === 'emergency' ? `https://incident-report-98rf.onrender.com/emergency/${id}/status` : `https://incident-report-98rf.onrender.com/incident/${id}/status`;
 
     try {
       const response = await fetch(url, {

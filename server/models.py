@@ -51,16 +51,19 @@ class User(db.Model, SerializerMixin):
     def reports_count(self):
         return len(self.incident_reports)
     
-    # def to_dict(self):
-    #     return {
-    #         'id': self.id,
-    #         'username': self.username,
-    #         'email': self.email,
-    #         'phone': self.phone,
-    #         'created_at': self.created_at,
-    #         'reports_count': self.reports_count,
-    #         'banned': self.banned
-    #     }
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'phone': self.phone,
+            'created_at': self.created_at,
+            'reports_count': self.reports_count,
+            'banned': self.banned, 
+            'role': self.role,
+            'incident_reports': [incident.to_dict() for incident in self.incident_reports]  # Calling to_dict() on each incident
+        }
     
 
 class Report(db.Model, SerializerMixin):

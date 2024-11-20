@@ -25,7 +25,8 @@ export default function Login() {
     validationSchema: loginValidationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch('http://127.0.0.1:5555/login', {
+        
+        const response = await fetch('https://incident-report-98rf.onrender.com/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -34,11 +35,22 @@ export default function Login() {
         });
 
         if (response.ok) {
-          return response.json().then((data) => {
-            localStorage.setItem('user_id', data.user_data.id);
-            toast.success('Login successful!');
-            data.role === 'user' ? navigate('/user') : navigate('/admin/d');
-          });
+          return response.json().then(data => {
+            localStorage.setItem("access_token", data.access_token);
+            localStorage.setItem('user_id', data.user_data.id)
+            console.log(data.user_data.role)
+            
+            // Redirect based on the user's role
+            if (data.user_data.role === "admin") {
+              navigate(`/admin/d/${localStorage.getItem('user_id')}`);
+              toast.success(`Welcome ${data.user_data.username}!`);
+            } else if (data.user_data.role === "user") {
+              navigate(`/user/${localStorage.getItem('user_id')}`);
+              toast.success(`Welcome ${data.user_data.username}!`);
+            } else {
+              toast.error('You are not registered. Please contact support.');
+            }
+          })
         } else {
           const errorMessage = await response.text();
           toast.error(errorMessage || 'Login failed. Please check your credentials.');

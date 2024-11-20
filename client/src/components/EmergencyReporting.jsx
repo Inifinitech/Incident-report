@@ -123,8 +123,8 @@ export default function EmergencyReport({ onClose }) {
         <div className="p-6">
           
           <div className="bg-yellow-500 text-white p-3 rounded-lg mb-6 text-center font-bold text-lg">
-            <p>Post Real time <span className="underline text-green-500">images</span> and <span className="underline text-green-500">videos</span>,<span className="underline text-red-500">sign in</span></p>
-            <p>For quicker updates and personalized emergency assistance, <span className="underline text-red-500">sign up or log in</span>. Your details help us prioritize your safety and keep you informed!</p>
+            <p className="text-gray-900">Post Real time <span className="underline text-white">images</span> and <span className="underline text-white">videos</span></p>
+            <p className="text-gray-900">For quicker updates and personalized emergency assistance, <span className="underline text-red-500">sign up or log in</span>. Your details help us prioritize your safety and keep you informed!</p>
           </div>
 
           <div className="flex items-center gap-3 mb-6">
