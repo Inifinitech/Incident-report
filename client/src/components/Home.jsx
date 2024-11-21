@@ -53,10 +53,10 @@ export default function LandingPage() {
         </video>
 
         <div className="relative z-10 text-center px-4">
-          <p className="text-8xl md:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto">
-            Report and track incidents in real-time before or after they happen.
-            Help make our communities safer together.
-          </p>
+        <p className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-gray-200 mb-8 max-w-2xl mx-auto">
+          Report and track incidents in real-time before or after they happen.
+          Help make our communities safer together.
+        </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

@@ -1,3 +1,4 @@
+import './i18n';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout.jsx';

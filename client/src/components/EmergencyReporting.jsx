@@ -72,7 +72,7 @@ export default function EmergencyReport({ onClose }) {
 
   const addIncident = async (incidentData) => {
     try {
-      const response = await fetch('http://127.0.0.1:5555/emergency-reporting', {
+      const response = await fetch('https://incident-report-98rf.onrender.com/emergency-reporting', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

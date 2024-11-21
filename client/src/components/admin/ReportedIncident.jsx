@@ -72,30 +72,38 @@ export default function ReportedIncidents() {
   };
 
   const updateStatus = async (id, newStatus, type) => {
-    const url = type === 'emergency' ? `https://incident-report-98rf.onrender.com/emergency/${id}/status` : `https://incident-report-98rf.onrender.com/incident/${id}/status`;
-
+    const url =
+      type === 'emergency'
+        ? `https://incident-report-98rf.onrender.com/emergency/${id}/status`
+        : `https://incident-report-98rf.onrender.com/incident/${id}/status`;
+  
     try {
       const response = await fetch(url, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
       });
-      
+  
       if (response.ok) {
         setIncidents((prevIncidents) =>
-          prevIncidents.map((incident) =>
-            incident.id === id ? { ...incident, status: newStatus } : incident
-          )
+          prevIncidents.map((incident) => {
+            // Ensure the incident is updated only if the id matches
+            if (incident.id === id && incident.type === type) {
+              return { ...incident, status: newStatus };
+            }
+            return incident;
+          })
         );
       } else {
-        console.error("Failed to update incident status");
+        console.error('Failed to update incident status');
       }
     } catch (error) {
-      console.error("Error updating incident status:", error);
+      console.error('Error updating incident status:', error);
     }
   };
+  
 
   const openImageModal = (image) => {
     setSelectedImage(image);

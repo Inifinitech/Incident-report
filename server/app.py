@@ -24,7 +24,7 @@ from models import db, User, Report, Notification, Admin, EmergencyReport, Image
 from itsdangerous import URLSafeTimedSerializer,BadSignature, SignatureExpired
 
 app=Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] ="sqlite:///app.db"
+app.config["SQLALCHEMY_DATABASE_URI"] ="postgresql://rescueapp_user:NDrLae58qZe2tTtHX47B7mugRrAEtXMz@dpg-csv17glumphs739p7je0-a.oregon-postgres.render.com/rescueapp"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
 app.config['SECRET_KEY'] = '0c3ZMJFCAm5T-NK5ZzBv50ZLuxamAllTob6uzEqRR14'
 app.config['JWT_ACCESS_TOKEN_EXPIRES']=timedelta(minutes=30)
@@ -328,50 +328,47 @@ class UpdateIncidentStatus(Resource):
         
 
 class DeleteIncident(Resource):
-    
     def delete(self, id):
+        incident = Report.query.get(id)
+        if not incident:
+            return {"message": "Incident not found"}, 404
+        
+        # Delete associated media
+        media_images = ImageUrl.query.filter_by(incident_id=id).all()
+        media_videos = VideoUrl.query.filter_by(incident_id=id).all()
 
-        incident_del = Report.query.get(id)
-        db.session.delete(incident_del)
+        for image in media_images:
+            db.session.delete(image)
+        for video in media_videos:
+            db.session.delete(video)
+
+        db.session.delete(incident)
         db.session.commit()
 
-        return make_response('Incident deleted')
+        return {"message": "Incident and associated media deleted successfully"}, 200
+
+        
+
+# class DeleteIncident(Resource):
     
-# # incident media endpoint
-# class MediaPost(Resource):
-#     def post(self):
-#         data = request.get_json()
-#         incident_report_id = data.get('incident_report_id')
+#     def delete(self, id):
 
-#         if data.get('media_image'):
-#             new_image = ImageUrl(
-#                 incident_report_id=incident_report_id,
-#                 media_image=data.get('media_image')
-#             )
-#             db.session.add(new_image)
-
-#         if data.get('media_video'):
-#             new_video = VideoUrl(
-#                 incident_report_id=incident_report_id,
-#                 media_video=data.get('media_video')
-#             )
-#             db.session.add(new_video)
-
+#         incident_del = Report.query.get(id)
+#         db.session.delete(incident_del)
 #         db.session.commit()
 
-#         return make_response({"message": "Media added!"}, 201)
-
+#         return make_response('Incident deleted')
     
-class MediaDelete(Resource):
-    def delete(self, id):
+# class MediaDelete(Resource):
+#     def delete(self, id):
 
-        media_image = ImageUrl.query.get(id)
-        media_video = VideoUrl.query.get(id)
-        db.session.delete(media_image)
-        db.session.delete(media_video)
-        db.session.commit()
+#         media_image = ImageUrl.query.get(id)
+#         media_video = VideoUrl.query.get(id)
+#         db.session.delete(media_image)
+#         db.session.delete(media_video)
+#         db.session.commit()
 
-        return make_response('Media deleted!!')
+#         return make_response('Media deleted!!')
     
 class RatingResource(Resource):
     def get(self):
@@ -426,6 +423,26 @@ class EmergencyPost(Resource):
         db.session.commit()
 
         return make_response({"message": "Emergency posted successfully"}, 201)
+    
+class UpdateEmergencyPostStatus(Resource):
+    def patch(self, id):
+        data = request.get_json()
+
+        new_status = data.get('status')
+
+
+        incident = Report.query.get(id)
+        if not incident:
+            return make_response({"error": "Incident not found!"}, 404)
+
+        if new_status in ['under investigation', 'resolved', 'rejected']:
+            incident.status = new_status
+            db.session.commit()
+            return make_response({"message": "Status Updated successfully", "incident": incident.to_dict()}, 200)
+        
+        else:
+            return make_response({"error": "Invalid status"})
+
     
     
     
@@ -699,10 +716,11 @@ api.add_resource(DeleteIncident, '/deletes-incident/<int:id>')
 
 # route for emergency
 api.add_resource(EmergencyPost, '/emergency-reporting')
+api.add_resource( UpdateEmergencyPostStatus, '/emergency/<int:id>/status' )
 
 # routes for media
 # api.add_resource(MediaPost, '/media')
-api.add_resource(MediaDelete, '/media/<int:id>')
+# api.add_resource(MediaDelete, '/media/<int:id>')
 
 
 # routes for admin actions

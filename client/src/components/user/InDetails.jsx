@@ -29,7 +29,7 @@ export default function IncidentDetails() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://127.0.0.1:5555/user/${userId}`)
+    fetch(`https://incident-report-98rf.onrender.com/user/${userId}`)
       .then((response) => response.json())
       .then(async (data) => {
         const fetchedIncidents = data.incident_reports;
@@ -55,7 +55,7 @@ export default function IncidentDetails() {
         setLoading(false);
       });
 
-    fetch("http://127.0.0.1:5555/ratings")
+    fetch("https://incident-report-98rf.onrender.com/ratings")
       .then((response) => response.json())
       .then((data) => {
         setReviews(data.message);

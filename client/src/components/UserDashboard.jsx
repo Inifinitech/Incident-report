@@ -13,15 +13,13 @@ export default function UserDashboard() {
   const id = params.id;
   console.log(id);
 
-  // Loading state
   const [isUserDataLoaded, setIsUserDataLoaded] = useState(false);
 
   useEffect(() => {
-    // Fetch user data based on user ID
-    fetch(`http://127.0.0.1:5555/user/${id}`)
+    fetch(`https://incident-report-98rf.onrender.com/user/${id}`)
       .then(response => response.json())
       .then(data => {
-        setUserData(data); // Update context with fetched user data
+        setUserData(data);
         setIsUserDataLoaded(true);
       })
       .catch((error) => console.error('Error fetching user data:', error));
@@ -33,7 +31,6 @@ export default function UserDashboard() {
         <div className="bg-gray-800 rounded-lg p-6 mb-8">
           <div className="flex items-center gap-6">
             <div className="w-16 h-16 bg-yellow-500 text-gray-900 flex items-center justify-center rounded-full text-2xl font-bold">
-              {/* Display username's first letter or a default letter */}
               {isUserDataLoaded ? (userData?.username?.charAt(0).toUpperCase() || 'U') : 'U'}
             </div>
             <div>
@@ -49,7 +46,6 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Statistics Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatCard
             icon={AlertTriangle}
@@ -101,7 +97,6 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Recent Alerts Section */}
         <div className="bg-gray-800 rounded-lg p-6">
           <h2 className="text-xl font-bold mb-4 text-white">Recent Alerts</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

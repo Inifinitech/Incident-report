@@ -29,7 +29,6 @@ export default function IncidentReport() {
     }),
     onSubmit: async (values) => {
       try {
-        // Create form data object for multipart submission
         const formData = new FormData();
         formData.append('user_id', localStorage.getItem('user_id'));
         formData.append('description', values.description);
@@ -37,18 +36,15 @@ export default function IncidentReport() {
         formData.append('latitude', values.latitude);
         formData.append('longitude', values.longitude);
 
-        // Append images to FormData
         values.images.forEach((image) => {
           formData.append('media_image', image);
         });
 
-        // Append videos to FormData
         values.videos.forEach((video) => {
           formData.append('media_video', video);
         });
 
-        // Send the POST request
-        const response = await fetch('http://127.0.0.1:5555/incidents', {
+        const response = await fetch('https://incident-report-98rf.onrender.com/incidents', {
           method: 'POST',
           body: formData,
         });

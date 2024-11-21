@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AlertTriangle, LogIn, Mail, Lock, ArrowLeft } from 'lucide-react'; 
+import { AlertTriangle, LogIn, Mail, Lock, ArrowLeft,Eye, EyeOff } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -68,14 +68,12 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
       <div className="max-w-md w-full text-white">
-        {/* Back to Home Button */}
-        <button
+      <button
           onClick={handleBackToHome}
           className="absolute top-4 left-4 text-yellow-500 hover:text-yellow-400 focus:outline-none"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
-
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <AlertTriangle className="w-10 h-10 text-yellow-500" />

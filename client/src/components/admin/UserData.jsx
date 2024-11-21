@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Mail, Phone, Calendar, AlertTriangle, MoreVertical, Trash2, CheckCircle, Slash } from 'lucide-react';
+import { Search, Mail, Phone, Calendar, AlertTriangle, MoreVertical, Trash2, CheckCircle, Slash, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function UserData() {
@@ -208,6 +208,10 @@ export default function UserData() {
                 <div className="flex items-center gap-2 text-gray-400">
                   <AlertTriangle className="w-4 h-4" />
                   <span>{user.reports_count} Reports Submitted</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <User className="w-4 h-4" />
+                  <span>{user.role}</span>
                 </div>
                 {user.is_banned && (
                   <p className="text-red-500 font-bold">User is banned</p>

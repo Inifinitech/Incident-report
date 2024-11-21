@@ -9,7 +9,7 @@ const AppContextProvider = (props) => {
 
     const user_id = localStorage.getItem('user_id')
     useEffect(()=> {
-        fetch (`http://127.0.0.1:5555/user/${user_id}`)
+        fetch (`https://incident-report-98rf.onrender.com/user/${user_id}`)
         .then((resp) => resp.json())
         .then((data) => setUserData(data))
     }, [user_id])
@@ -19,7 +19,7 @@ const AppContextProvider = (props) => {
     }
 
     useEffect(() => {
-        fetch('http://127.0.0.1:5555/incidents')
+        fetch('https://incident-report-98rf.onrender.com/incidents')
         .then((resp) => resp.json())
         .then((data) => setIncidents(data))
         .catch((error) => console.error('Error fetching incidents', error))
