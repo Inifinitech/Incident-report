@@ -3,7 +3,7 @@ Accidents and emergencies are common occurrences in Kenya, and the key to saving
 
 The goal of this project is to build an easy-to-use application that allows users to report incidents and track their status while providing vital information (such as geolocation, images, and videos) to support the claim. Administrators can also manage and update the status of incident reports.
 
-----------
+---------
 
 ## Table of Contents
 
@@ -198,7 +198,7 @@ The backend uses *SQLite* as the database. You don't need to set up any addition
     (venv) $ pytest 
     
 
-----------
+---------
 
 ### CI/CD Setup
 
@@ -209,7 +209,7 @@ GitHub Actions and CircleCI are used for continuous integration and deployment.
 -   *CircleCI* is used for the integration pipeline to ensure that the code is tested before deployment.
     
 
-----------
+---------
 
 ## API Endpoints
 

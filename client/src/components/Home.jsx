@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { AlertTriangle, Clock, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import videoBg from "../videos/response1.mp4";
@@ -53,10 +53,10 @@ export default function LandingPage() {
         </video>
 
         <div className="relative z-10 text-center px-4">
-          <p className="text-8xl md:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto">
-            Report and track incidents in real-time before or after they happen.
-            Help make our communities safer together.
-          </p>
+        <p className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-gray-200 mb-8 max-w-2xl mx-auto">
+          Report and track incidents in real-time before or after they happen.
+          Help make our communities safer together.
+        </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -92,25 +92,25 @@ export default function LandingPage() {
           )}
         </div>
       </div>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen pt-8 bg-gray-900">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="text-4xl font-bold text-gray-600">{stat.value}</div>
-              <div className="mt-2 text-sm text-gray-900">{stat.label}</div>
+              <div className="text-4xl font-bold text-yellow-500">{stat.value}</div>
+              <div className="mt-2 text-sm text-gray-200">{stat.label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-900">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-black mb-4">
+          <h2 className="text-3xl font-bold text-gray-300 mb-4">
             Why Choose MyResque?
           </h2>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-400 text-lg">
             Comprehensive incident management solution
           </p>
         </div>
@@ -119,15 +119,15 @@ export default function LandingPage() {
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="relative p-8 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+              className="relative p-8 bg-white/10 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
             >
-              <div className="inline-block p-4 bg-teal-50 rounded-lg mb-5">
-                <feature.icon className="w-6 h-6 text-teal-500" />
+              <div className="inline-block p-4 bg-white/20 rounded-lg mb-5">
+                <feature.icon className="w-6 h-6 text-yellow-500" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-3">
+              <h3 className="text-xl font-semibold text-gray-300 mb-3">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-200 leading-relaxed">
                 {feature.description}
               </p>
             </div>

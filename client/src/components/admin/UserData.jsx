@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Mail, Phone, Calendar, AlertTriangle, MoreVertical, Trash2, CheckCircle, Slash } from 'lucide-react';
+import { Search, Mail, Phone, Calendar, AlertTriangle, MoreVertical, Trash2, CheckCircle, Slash, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function UserData() {
@@ -10,7 +10,7 @@ export default function UserData() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5555/users');
+        const response = await fetch('https://incident-report-98rf.onrender.com/users');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -30,7 +30,7 @@ export default function UserData() {
 
   const banUser = async (userId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5555/users/${userId}/ban`, {
+      const response = await fetch(`https://incident-report-98rf.onrender.com/users/${userId}/ban`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export default function UserData() {
 
   const unbanUser = async (userId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5555/users/${userId}/unban`, {
+      const response = await fetch(`https://incident-report-98rf.onrender.com/users/${userId}/unban`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export default function UserData() {
     const user = users.find((user) => user.id === userId);
 
     toast.promise(
-      fetch(`http://127.0.0.1:5555/user/${userId}`, {
+      fetch(`https://incident-report-98rf.onrender.com/user/${userId}`, {
         method: 'DELETE',
       }).then((response) => {
         if (!response.ok) {
@@ -208,6 +208,10 @@ export default function UserData() {
                 <div className="flex items-center gap-2 text-gray-400">
                   <AlertTriangle className="w-4 h-4" />
                   <span>{user.reports_count} Reports Submitted</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <User className="w-4 h-4" />
+                  <span>{user.role}</span>
                 </div>
                 {user.is_banned && (
                   <p className="text-red-500 font-bold">User is banned</p>

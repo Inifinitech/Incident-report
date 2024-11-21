@@ -29,7 +29,7 @@ export default function IncidentDetails() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://127.0.0.1:5555/user/${userId}`)
+    fetch(`https://incident-report-98rf.onrender.com/user/${userId}`)
       .then((response) => response.json())
       .then(async (data) => {
         const fetchedIncidents = data.incident_reports;
@@ -55,7 +55,7 @@ export default function IncidentDetails() {
         setLoading(false);
       });
 
-    fetch("http://127.0.0.1:5555/ratings")
+    fetch("https://incident-report-98rf.onrender.com/ratings")
       .then((response) => response.json())
       .then((data) => {
         setReviews(data.message);
@@ -144,7 +144,7 @@ export default function IncidentDetails() {
                     </div>
                     <div className="flex items-center gap-2 text-gray-400 mb-4">
                       <Clock className="w-4 h-4" />
-                      <span>{incident.created_at}</span>
+                      <span>{incident.date}</span>
                     </div>
                     <p className="text-gray-300">{incident.description}</p>
                   </div>
@@ -152,7 +152,7 @@ export default function IncidentDetails() {
                   <div>
                     {incident.images.length > 0 && (
                       <img
-                        src={incident.images[0].media_image}
+                        src={incident.images[0]}
                         alt="incident image"
                         className="w-full h-48 object-cover rounded-lg"
                       />

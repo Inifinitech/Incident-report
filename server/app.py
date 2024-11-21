@@ -1,10 +1,15 @@
 from flask import Flask,make_response,request,jsonify,session
+from sqlalchemy.orm import Session
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
+from sqlalchemy.orm import joinedload
 # from flask_bcrypt import Bcrypt
 from sqlalchemy import func, MetaData
 from flask_cors import CORS
+import cloudinary
+import cloudinary.uploader
+from cloudinary.utils import cloudinary_url
 import os
 
 from flask_jwt_extended import create_access_token,JWTManager, create_refresh_token, jwt_required, get_jwt_identity, current_user, verify_jwt_in_request, get_jwt
@@ -18,7 +23,7 @@ from werkzeug.security import generate_password_hash
 from models import db, User, Report, Notification, Admin, EmergencyReport, ImageUrl, VideoUrl, Rating,ContactMessage, UserRoleEnum
 
 app=Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] ="sqlite:///app.db"
+app.config["SQLALCHEMY_DATABASE_URI"] ="postgresql://rescueapp_user:NDrLae58qZe2tTtHX47B7mugRrAEtXMz@dpg-csv17glumphs739p7je0-a.oregon-postgres.render.com/rescueapp"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
 app.config['SECRET_KEY'] = '0c3ZMJFCAm5T-NK5ZzBv50ZLuxamAllTob6uzEqRR14'
 app.config['JWT_ACCESS_TOKEN_EXPIRES']=timedelta(minutes=30)
@@ -26,12 +31,25 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES']=timedelta(minutes=30)
 app.config['JWT_ACCESS_REFRESH_EXPIRES']=timedelta(days=30)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
+import cloudinary
+import cloudinary.uploader
+from cloudinary.utils import cloudinary_url
+
+# Configuration       
+cloudinary.config( 
+    cloud_name = "donshmlbl", 
+    api_key = "242734965428198", 
+    api_secret = "bEjn6K699pjcC3kOL3bTGPZHOu8", # Click 'View API Keys' above to copy your API secret
+    secure=True
+)
+
 
 CORS(app)
 migrate=Migrate(app,db)
 db.init_app(app)
 api=Api(app)
 # bcrypt=Bcrypt(app)
+
 
 # Flask-Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -82,6 +100,7 @@ def after_request(response):
     return response
 
 
+
 class Users(Resource):
     # @jwt_required()
     # @allow("admin")
@@ -92,7 +111,10 @@ class Users(Resource):
 
 class GetUser(Resource):
     def get(self, id):
-        user = User.query.filter(User.id == id).first()
+        user = db.session.query(User).options(
+            joinedload(User.incident_reports).joinedload(Report.images),
+            joinedload(User.incident_reports).joinedload(Report.videos)
+        ).filter(User.id == id).first()
         if user:
             return make_response(user.to_dict(), 200)
         else:
@@ -107,31 +129,6 @@ class GetUser(Resource):
         db.session.commit()
         return make_response({"message": f"{user.username} deleted!"}, 200)
     
-class BanUser(Resource):
-    def patch(self, id):
-        user = User.query.get(id)
-        if not user:
-            return {"message": "User not found"}, 404
-
-        user.banned = True
-        db.session.commit()
-        return {"message": "User has been banned"}, 200
-
-class UnbanUser(Resource):
-    def patch(self, id):
-        try:
-            user = User.query.get(id)
-            if not user:
-                return {"message": "User not found"}, 404
-            
-            user.banned = False
-            db.session.commit()
-            return {"message": "User has been unbanned"}, 200
-        
-        except Exception as e:
-            print(f"Error unbanning user: {e}")
-            return {"error": str(e)}, 500
-
 class BanUser(Resource):
     def patch(self, id):
         user = User.query.get(id)
@@ -208,10 +205,14 @@ class Signup(Resource):
     
 class Incident(Resource):
     def post(self):
-        data = request.get_json()
 
-        user_id = data.get('user_id')
-        user = User.query.get(user_id)
+        user_id = request.form.get('user_id')
+        description = request.form.get('description')
+        latitude = request.form.get('latitude')
+        longitude = request.form.get('longitude')
+
+        with db.session() as session:
+            user = session.get(User, user_id)
         
         # Check if the user exists and if they are banned
         if not user:
@@ -220,19 +221,56 @@ class Incident(Resource):
             return make_response(jsonify({"error": "User is banned and cannot post incidents"}), 403)
 
         new_incident = Report (
-            user_id = data.get('user_id'),
-            description = data.get('description'),
-            status = data.get('status'),
-            latitude=data.get('latitude'),
-            longitude=data.get('longitude'),
-            created_at = datetime.now()
+            user_id=user_id,
+            description=description,
+            status="under investigation",
+            latitude=latitude,
+            longitude=longitude,
+            created_at=datetime.now()
         )
 
         db.session.add(new_incident)
+        db.session.flush() 
+
+        images = request.files.getlist('media_image')  
+        videos = request.files.getlist('media_video')
+
+        # Upload images to Cloudinary
+        for image in images:
+            if image:
+                upload_result = cloudinary.uploader.upload(image, resource_type="image")
+                new_image = ImageUrl(
+                    incident_report_id=new_incident.id,
+                    media_image=upload_result['url']
+                )
+                db.session.add(new_image)
+
+        # Upload videos to Cloudinary
+        for video in videos:
+            if video:
+                upload_result = cloudinary.uploader.upload(video, resource_type="video")
+                new_video = VideoUrl(
+                    incident_report_id=new_incident.id,
+                    media_video=upload_result['url']
+                )
+                db.session.add(new_video)
+
+        # Commit the transaction
         db.session.commit()
+
+        # Prepare the response
+        response = new_incident.to_dict()  # Assuming `to_dict` method includes incident details
+        response["media"] = {
+            "images": [image.media_image for image in ImageUrl.query.filter_by(incident_report_id=new_incident.id)],
+            "videos": [video.media_video for video in VideoUrl.query.filter_by(incident_report_id=new_incident.id)]
+        }
+
+        return make_response(jsonify(response), 201)
+
+        # db.session.commit()
         
-        print(f"New Incident Created: {new_incident.to_dict()}")
-        return make_response(new_incident.to_dict(), 201)
+        # print(f"New Incident Created: {new_incident.to_dict()}")
+        # return make_response(new_incident.to_dict(), 201)
     
     def get(self):        
         incidents = [incident.to_dict() for incident in Report.query.all()]
@@ -286,50 +324,47 @@ class UpdateIncidentStatus(Resource):
         
 
 class DeleteIncident(Resource):
-    
     def delete(self, id):
+        incident = Report.query.get(id)
+        if not incident:
+            return {"message": "Incident not found"}, 404
+        
+        # Delete associated media
+        media_images = ImageUrl.query.filter_by(incident_id=id).all()
+        media_videos = VideoUrl.query.filter_by(incident_id=id).all()
 
-        incident_del = Report.query.get(id)
-        db.session.delete(incident_del)
+        for image in media_images:
+            db.session.delete(image)
+        for video in media_videos:
+            db.session.delete(video)
+
+        db.session.delete(incident)
         db.session.commit()
 
-        return make_response('Incident deleted')
+        return {"message": "Incident and associated media deleted successfully"}, 200
+
+        
+
+# class DeleteIncident(Resource):
     
-# incident media endpoint
-class MediaPost(Resource):
-    def post(self):
-        data = request.get_json()
-        incident_report_id = data.get('incident_report_id')
+#     def delete(self, id):
 
-        if data.get('media_image'):
-            new_image = ImageUrl(
-                incident_report_id=incident_report_id,
-                media_image=data.get('media_image')
-            )
-            db.session.add(new_image)
+#         incident_del = Report.query.get(id)
+#         db.session.delete(incident_del)
+#         db.session.commit()
 
-        if data.get('media_video'):
-            new_video = VideoUrl(
-                incident_report_id=incident_report_id,
-                media_video=data.get('media_video')
-            )
-            db.session.add(new_video)
-
-        db.session.commit()
-
-        return make_response({"message": "Media added!"}, 201)
-
+#         return make_response('Incident deleted')
     
-class MediaDelete(Resource):
-    def delete(self, id):
+# class MediaDelete(Resource):
+#     def delete(self, id):
 
-        media_image = ImageUrl.query.get(id)
-        media_video = VideoUrl.query.get(id)
-        db.session.delete(media_image)
-        db.session.delete(media_video)
-        db.session.commit()
+#         media_image = ImageUrl.query.get(id)
+#         media_video = VideoUrl.query.get(id)
+#         db.session.delete(media_image)
+#         db.session.delete(media_video)
+#         db.session.commit()
 
-        return make_response('Media deleted!!')
+#         return make_response('Media deleted!!')
     
 class RatingResource(Resource):
     def get(self):
@@ -377,12 +412,33 @@ class EmergencyPost(Resource):
             status = data.get('status'),
             latitude=data.get('latitude'),
             longitude=data.get('longitude'),
-            phone=data.get('phone')
+            phone=data.get('phone'),
+            created_at = datetime.now()
         ) 
         db.session.add(emergency_report)
         db.session.commit()
 
         return make_response({"message": "Emergency posted successfully"}, 201)
+    
+class UpdateEmergencyPostStatus(Resource):
+    def patch(self, id):
+        data = request.get_json()
+
+        new_status = data.get('status')
+
+
+        incident = Report.query.get(id)
+        if not incident:
+            return make_response({"error": "Incident not found!"}, 404)
+
+        if new_status in ['under investigation', 'resolved', 'rejected']:
+            incident.status = new_status
+            db.session.commit()
+            return make_response({"message": "Status Updated successfully", "incident": incident.to_dict()}, 200)
+        
+        else:
+            return make_response({"error": "Invalid status"})
+
     
     
     
@@ -526,8 +582,7 @@ class Login(Resource):
    
 class Contact(Resource):
     def post(self):
-        data = request.get_json()  
-
+        data = request.get_json()
         name = data.get('name')
         email = data.get('email')
         message = data.get('message')
@@ -536,23 +591,42 @@ class Contact(Resource):
             return {'error': 'All fields are required!'}, 400
 
         try:
+            # Store message in the database
             new_message = ContactMessage(name=name, email=email, message=message)
             db.session.add(new_message)
             db.session.commit()
 
+            # Send the email
             msg = Message(
                 subject=f"Contact Form Submission from {name}",
-                sender=email,  
-                recipients=['isackuria@gmail.com'],  
+                sender=email,
+                recipients=['isackuria@gmail.com'],
                 body=f"Name: {name}\nEmail: {email}\nMessage:\n{message}"
             )
             mail.send(msg)
 
-            return {'message': 'Your message has been sent successfully!'}, 200
+            return {'message': 'Your message has been sent successfully!'}, 201
         except Exception as e:
             print(f"Error: {e}")
             return {'error': 'Failed to send your message. Please try again later.'}, 500
 
+    def get(self):
+        try:
+            # Retrieve messages from the database
+            messages = ContactMessage.query.all()
+            return [
+                {
+                    'id': message.id,
+                    'name': message.name,
+                    'email': message.email,
+                    'message': message.message,
+                    # 'timestamp': message.timestamp.isoformat()
+                }
+                for message in messages
+            ], 200
+        except Exception as e:
+            print(f"Error: {e}")
+            return {'error': 'Failed to fetch messages. Please try again later.'}, 500
 
 api.add_resource(GetUser, '/user/<int:id>')
 api.add_resource(Users, '/users')
@@ -569,10 +643,12 @@ api.add_resource(DeleteIncident, '/deletes-incident/<int:id>')
 
 # route for emergency
 api.add_resource(EmergencyPost, '/emergency-reporting')
+api.add_resource( UpdateEmergencyPostStatus, '/emergency/<int:id>/status' )
 
 # routes for media
-api.add_resource(MediaPost, '/media')
-api.add_resource(MediaDelete, '/media/<int:id>')
+# api.add_resource(MediaPost, '/media')
+# api.add_resource(MediaDelete, '/media/<int:id>')
+
 
 # routes for admin actions
 api.add_resource(AdminIncidents, '/admin/reports')
@@ -587,7 +663,7 @@ api.add_resource(RatingResource, '/ratings')
 api.add_resource(Analytics, '/analytics')
 
 # route for contact
-api.add_resource(Contact, '/api/contact')
+api.add_resource(Contact, '/contact')
 
 # routes for notifications
 # api.add_resource(GetNotifications, '/notifications')

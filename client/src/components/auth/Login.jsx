@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AlertTriangle, LogIn, Mail, Lock } from 'lucide-react';
+import { AlertTriangle, LogIn, Mail, Lock, ArrowLeft,Eye, EyeOff } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -14,6 +15,7 @@ const loginValidationSchema = Yup.object({
 export default function Login() {
   const navigate = useNavigate();
   const value = useContext(AppContext)
+  const [showPassword, setShowPassword] = useState(false)
 
   const formik = useFormik({
     initialValues: {
@@ -24,7 +26,7 @@ export default function Login() {
     onSubmit: async (values) => {
       try {
         
-        const response = await fetch('http://127.0.0.1:5555/login', {
+        const response = await fetch('https://incident-report-98rf.onrender.com/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -34,9 +36,20 @@ export default function Login() {
         
         if (response.ok) {
           return response.json().then(data => {
+            localStorage.setItem("access_token", data.access_token);
             localStorage.setItem('user_id', data.user_data.id)
-            toast.success('Login successful!');
-            data.role === 'user' ? navigate('/user') : navigate('/admin/d')
+            console.log(data.user_data.role)
+            
+            // Redirect based on the user's role
+            if (data.user_data.role === "admin") {
+              navigate(`/admin/d/${localStorage.getItem('user_id')}`);
+              toast.success(`Welcome ${data.user_data.username}!`);
+            } else if (data.user_data.role === "user") {
+              navigate(`/user/${localStorage.getItem('user_id')}`);
+              toast.success(`Welcome ${data.user_data.username}!`);
+            } else {
+              toast.error('You are not registered. Please contact support.');
+            }
           })
         } else {
           const errorMessage = await response.text();
@@ -48,9 +61,19 @@ export default function Login() {
     },
   });
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
       <div className="max-w-md w-full text-white">
+      <button
+          onClick={handleBackToHome}
+          className="absolute top-4 left-4 text-yellow-500 hover:text-yellow-400 focus:outline-none"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <AlertTriangle className="w-10 h-10 text-yellow-500" />
@@ -105,7 +128,7 @@ export default function Login() {
               <input type="checkbox" className="mr-2" />
               <span>Remember me</span>
             </label>
-            <Link to="/forgot-password" className="text-yellow-500 hover:text-yellow-400">
+            <Link to="/forgotP" className="text-yellow-500 hover:text-yellow-400">
               Forgot password?
             </Link>
           </div>

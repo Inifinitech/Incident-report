@@ -1,4 +1,3 @@
-
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   AlertTriangle, 
@@ -6,29 +5,27 @@ import {
   Settings, 
   LogOut, 
   Bell, 
-  Upload, 
-  Camera,
   FileText,
   Home,
   User, 
-  Info
 } from 'lucide-react';
 
 export default function Sidebar({ isAdmin = false }) {
   const navigate = useNavigate();
+  const userId = localStorage.getItem("user_id")
   const navItems = isAdmin ? [
-    { icon: Home, label: 'Dashboard', path: '/admin/d' },
+    { icon: Home, label: 'Dashboard', path: `/admin/d/${userId}` },
     { icon: AlertTriangle, label: 'Incident Reports', path: '/admin/incidents' },
     {icon: User, label: 'User Management', path: '/admin/usermanagement'},
     { icon: Bell, label: 'Analytics', path: '/admin/analytics' },
+    { icon: Map, label: 'Incidents Map', path: '/map/admin' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' }
   ] : [
-    { icon: Home, label: 'Home', path: '/user' },
+    { icon: Home, label: 'Home', path: `/user/${userId}`},
     { icon: AlertTriangle, label: 'Report an Incident', path: '/report' },
-    { icon: Map, label: 'Incidents Map', path: '/map' },
+    { icon: Map, label: 'Incidents Map', path: '/map/user' },
     { icon: Bell, label: 'News & Updates', path: '/news' },
     { icon: FileText, label: 'Incident Details', path: '/incidents' },
-    { icon: Camera, label: 'Add Photos/Videos', path: '/media' },
     { icon: Settings, label: 'App Settings', path: '/settings' }
   ];
 
@@ -40,9 +37,12 @@ export default function Sidebar({ isAdmin = false }) {
     <div className="w-64 h-100 bg-gray-900 text-white p-4">
       <div className="flex items-center gap-2 mb-8">
         <AlertTriangle className="w-8 h-8 text-yellow-400" />
-        <h1 className="text-xl font-bold">Rescue! Platform</h1>
+        <h1 className="text-xl font-bold">RescueApp! Platform</h1>
       </div>
+<<<<<<< HEAD
       
+=======
+>>>>>>> 42f6ea0437264aea0694bbb2f13cd69ab9ded50e
 
       <nav className="space-y-2">
         {navItems.map((item) => (
@@ -62,7 +62,10 @@ export default function Sidebar({ isAdmin = false }) {
           </NavLink>
         ))}
       </nav>
+<<<<<<< HEAD
       
+=======
+>>>>>>> 42f6ea0437264aea0694bbb2f13cd69ab9ded50e
 
       <div className="absolute bottom-4 left-4 right-4">
         <button onClick={handleLogout} className="flex items-center gap-2 w-full px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
