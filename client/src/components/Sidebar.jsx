@@ -1,3 +1,4 @@
+
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   AlertTriangle, 
@@ -39,10 +40,6 @@ export default function Sidebar({ isAdmin = false }) {
         <AlertTriangle className="w-8 h-8 text-yellow-400" />
         <h1 className="text-xl font-bold">RescueApp! Platform</h1>
       </div>
-<<<<<<< HEAD
-      
-=======
->>>>>>> 42f6ea0437264aea0694bbb2f13cd69ab9ded50e
 
       <nav className="space-y-2">
         {navItems.map((item) => (
@@ -62,10 +59,6 @@ export default function Sidebar({ isAdmin = false }) {
           </NavLink>
         ))}
       </nav>
-<<<<<<< HEAD
-      
-=======
->>>>>>> 42f6ea0437264aea0694bbb2f13cd69ab9ded50e
 
       <div className="absolute bottom-4 left-4 right-4">
         <button onClick={handleLogout} className="flex items-center gap-2 w-full px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
