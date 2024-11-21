@@ -1,4 +1,4 @@
-from flask import Flask,make_response,request,jsonify,session
+from flask import Flask,make_response,request,jsonify,session,url_for
 from sqlalchemy.orm import Session
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
@@ -58,7 +58,7 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'kipkiruidennis25@gmail.com'
 app.config['MAIL_PASSWORD'] = 'gzwp wywl ummf holw'
-app.config['MAIL_DEFAULT_SENDER'] = 'kipkiruidennis25@gmail.com'
+app.config['MAIL_DEFAULT_SENDER'] = 'none'
 
 mail = Mail(app)
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
@@ -614,6 +614,75 @@ class Contact(Resource):
         except Exception as e:
             print(f"Error: {e}")
             return {'error': 'Failed to fetch messages. Please try again later.'}, 500
+
+# Resource for Forgot Password
+class ForgotPassword(Resource):
+    def post(self):
+        email = request.json.get('email')
+
+        # Check if email exists in the database
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return {"message": "Email not found"}, 404
+
+        # Generate a reset token
+        token = s.dumps(email, salt='password-reset')
+
+        # Create reset link
+        reset_url = url_for('reset_password', token=token, _external=True)
+
+        # Send the reset link via email
+        try:
+            msg = Message("Password Reset Request", recipients=[email])
+            msg.body = f"Click the following link to reset your password: {reset_url}"
+            mail.send(msg)
+            return {"message": "Password reset email sent!"}, 200
+        except Exception as e:
+            return {"message": "Failed to send email", "error": str(e)}, 500
+
+
+# Resource for Reset Password
+class ResetPassword(Resource):
+    def get(self, token):
+        try:
+            # Load the email from the token
+            email = s.loads(token, salt='password-reset', max_age=3600)
+        except SignatureExpired:
+            return {"message": "The reset link has expired."}, 400
+        except BadSignature:
+            return {"message": "Invalid reset link."}, 400
+
+        # Return a JSON response with the email (form rendering can happen on the frontend)
+        return {"message": "Valid reset link", "email": email}, 200
+
+    def post(self, token):
+        try:
+            # Load the email from the token
+            email = s.loads(token, salt='password-reset', max_age=3600)
+        except SignatureExpired:
+            return {"message": "The reset link has expired."}, 400
+        except BadSignature:
+            return {"message": "Invalid reset link."}, 400
+
+        # Get the new password from the request
+        new_password = request.json.get('password')
+        if not new_password:
+            return {"message": "Password is required"}, 400
+
+        # Update the user's password in the database
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return {"message": "User not found"}, 404
+
+        user.set_password(new_password)  # Assuming a `set_password` method exists in your User model
+        user.save()  # Save the updated user to the database
+
+        return {"message": "Password reset successful!"}, 200
+
+
+# Registering resources with Flask-RESTful
+api.add_resource(ForgotPassword, '/forgot-password')
+api.add_resource(ResetPassword, '/reset-password/<string:token>')
 
 api.add_resource(GetUser, '/user/<int:id>')
 api.add_resource(Users, '/users')
